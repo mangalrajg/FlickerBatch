@@ -15,18 +15,20 @@ namespace FlickerBatch_AlbumRetriever
 {
     class MainClass
     {
-        static bool saveFlickrData = true;
-        static bool saveLocalData = false;
+        static bool saveFlickrData = false;
+        static bool saveLocalData = true;
         static void Main(string[] args)
         {
 
             DatabaseHelper.InitiallizeDataStructure();
+            if (saveFlickrData)
+            {
 
-            Console.WriteLine("Authenticating With Flicker");
-            Dictionary<string, string> auth_data = DatabaseHelper.loadConfigData("AUTH");
-            FlickerHelper.Flickr_Auth(auth_data);
-            DatabaseHelper.saveConfigData("AUTH", auth_data);
-
+                Console.WriteLine("Authenticating With Flicker");
+                Dictionary<string, string> auth_data = DatabaseHelper.loadConfigData("AUTH");
+                FlickerHelper.Flickr_Auth(auth_data);
+                DatabaseHelper.saveConfigData("AUTH", auth_data);
+            }
             if (saveFlickrData)
             {
                 Console.WriteLine("Download Photo Info from Flicker");
@@ -36,6 +38,11 @@ namespace FlickerBatch_AlbumRetriever
                 {
                     FlickerHelper.savePictures(ps);                    
                 }
+            }
+            if (saveLocalData)
+            {
+                Dictionary<string, string> local_data = DatabaseHelper.loadConfigData("LOCAL");
+                FilesystemHelper.getFileList(local_data["basePath"]);
             }
             Console.ReadLine();
 

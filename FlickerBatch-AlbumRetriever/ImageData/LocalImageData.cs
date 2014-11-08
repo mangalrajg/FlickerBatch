@@ -8,11 +8,15 @@ namespace FlickerBatch_AlbumRetriever.ImageData
 {
     public class LocalImageData : BaseImageData
     {
-        public static String DbTable = "REMOTE_DATA";
+        public static String DbTable = "LOCAL_DATA";
+        public static String InsertSQL = "Insert into " + DatabaseHelper.LOCAL_DATA
+            + "(FILENAME,DATE_TAKEN,DESCRIPTION,PATH,SIZE) VALUES('{0}','{1}','{2}','{3}','{4}')";
+        public static String CheckSQL = "Select count(1) from " + DatabaseHelper.LOCAL_DATA
+            + " where FILENAME='{0}' and PATH='{1}' and SIZE={2}";
         public String Path { get; set; }
-        public int Size { get; set; }
+        public long Size { get; set; }
 
-        public LocalImageData(String fileName, DateTime dateTaken, String desc, String path, int size)
+        public LocalImageData(String fileName, DateTime dateTaken, String desc, String path, long size)
             : base(fileName, dateTaken, desc)
         {
             Path = path;
@@ -22,13 +26,13 @@ namespace FlickerBatch_AlbumRetriever.ImageData
 
         public override String getInsertStatement()
         {
-            return String.Format("Insert into {0} (FILENAME,DATE_TAKEN,DESCRIPTION,PATH,SIZE) VALUES('{1}','{2}','{3}')", DbTable, Name, DateTaken, Description);
+            return String.Format(InsertSQL, Name.Replace("'", "''"), DateTaken, Description.Replace("'", "''"), Path.Replace("'", "''"), Size);
         }
 
 
         public override String getCheckStatement()
         {
-            return String.Format("Select count(1) from {0} where FILENAME='{2}' and PATH='{3}' and SIZE={4};", DbTable, Name, Path, Size );
+            return String.Format(CheckSQL, Name.Replace("'", "''"), Path.Replace("'", "''"), Size);
         }
     }
 }

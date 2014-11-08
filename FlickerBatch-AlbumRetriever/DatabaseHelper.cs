@@ -15,6 +15,7 @@ namespace FlickerBatch_AlbumRetriever
         public static String REMOTE_DATA = "REMOTE_DATA";
         public static String LOCAL_DATA = "LOCAL_DATA";
         public static String FLICKR_ALBUMS = "FLICKR_ALBUMS";
+        public static String JOIN = "JOIN";
 
         private static Object concurrencyObj = new object();
         public static void InitiallizeDataStructure()
@@ -23,13 +24,16 @@ namespace FlickerBatch_AlbumRetriever
                 "(config_type TEXT, param TEXT, value TEXT);");
 
             ExecuteNonQuery("CREATE TABLE if not exists " + REMOTE_DATA  +
-                "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT);");
+                "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT, PROCESSED TEXT);");
             
             ExecuteNonQuery("CREATE TABLE if not exists " + LOCAL_DATA  +
-                "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER);");
+                "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT);");
             
             ExecuteNonQuery("CREATE TABLE if not exists " + FLICKR_ALBUMS  +
                 "(ID TEXT, NAME TEXT, DATE_CREATED TEXT, DESCRIPTION TEXT);");
+
+            ExecuteNonQuery("CREATE TABLE if not exists " + JOIN +
+                "(NAME TEXT, DATE_CREATED TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT);");
 
             return;
         }
@@ -99,6 +103,7 @@ namespace FlickerBatch_AlbumRetriever
                 {
                     cmd.CommandText = bid.getInsertStatement();
                     cmd.ExecuteNonQuery();
+                    Console.Write(".");
 
                 }
                 cnn.Close();
