@@ -21,14 +21,18 @@ namespace FlickerBatch_AlbumRetriever
         {
 
             DatabaseHelper.InitiallizeDataStructure();
+
+            Console.WriteLine("Authenticating With Flicker");
             Dictionary<string, string> auth_data = DatabaseHelper.loadConfigData("AUTH");
             FlickerHelper.Flickr_Auth(auth_data);
             DatabaseHelper.saveConfigData("AUTH", auth_data);
 
             if (saveFlickrData)
             {
-                List<Photoset> psList = FlickerHelper.getAllAlbums();
-                foreach (Photoset ps in psList)
+                Console.WriteLine("Download Photo Info from Flicker");
+
+                List<FlickrAlbumData> psList = FlickerHelper.getAllAlbums();
+                foreach (FlickrAlbumData ps in psList)
                 {
                     FlickerHelper.savePictures(ps);                    
                 }

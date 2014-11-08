@@ -9,25 +9,26 @@ namespace FlickerBatch_AlbumRetriever.ImageData
     public class LocalImageData : BaseImageData
     {
         public static String DbTable = "REMOTE_DATA";
-        public String FileName { get; set; }
         public String Path { get; set; }
+        public int Size { get; set; }
 
-        public LocalImageData(String title, String fileName, DateTime dateTaken, String desc, String path)
-            : base(title, dateTaken, desc)
+        public LocalImageData(String fileName, DateTime dateTaken, String desc, String path, int size)
+            : base(fileName, dateTaken, desc)
         {
-            FileName = fileName;
             Path = path;
-
-
+            Size = size;
         }
-        
-        override
-        public String getInsertStatement()
+
+
+        public override String getInsertStatement()
         {
-            String insertSQL;
-            insertSQL = String.Format("Insert into {0} (TITLE,DATE_TAKEN,DESCRIPTION,ALBUM,ID) VALUES('{1}','{2}','{3}')", DbTable, FileName, DateTaken, Description);
-            return insertSQL;
+            return String.Format("Insert into {0} (FILENAME,DATE_TAKEN,DESCRIPTION,PATH,SIZE) VALUES('{1}','{2}','{3}')", DbTable, Name, DateTaken, Description);
         }
 
+
+        public override String getCheckStatement()
+        {
+            return String.Format("Select count(1) from {0} where FILENAME='{2}' and PATH='{3}' and SIZE={4};", DbTable, Name, Path, Size );
+        }
     }
 }

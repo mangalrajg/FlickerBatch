@@ -19,6 +19,7 @@ namespace FlickerBatch_AlbumRetriever.ImageData
             this.Description = desc;
         }
         public abstract String getInsertStatement();
+        public abstract String getCheckStatement();
 
     }
 }

@@ -56,20 +56,25 @@ namespace FlickerBatch_AlbumRetriever
             return flickr.PhotosetsGetList();
         }
 
-        public static List<Photoset> getAllAlbums()
+        public static List<FlickrAlbumData> getAllAlbums()
         {
-            PhotosetCollection psc = getCollection();
-            List<Photoset> retPs = new List<Photoset>();
-            foreach (Photoset ps in psc)
+            List<FlickrAlbumData> retPs = DatabaseHelper.LoadFlickerAlbums();
+            if (retPs.Count == 0)
             {
-                retPs.Add(ps);
+                PhotosetCollection psc = getCollection();
+                foreach (Photoset ps in psc)
+                {
+                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.Description);
+                    retPs.Add(fad);
+                }
+                DatabaseHelper.SaveFlickerAlbums(retPs);
             }
             return retPs;
         }
 
-        public static void savePictures(Photoset ps)
+        public static void savePictures(FlickrAlbumData ps)
         {
-            PhotosetPhotoCollection pspc = flickr.PhotosetsGetPhotos(ps.PhotosetId);
+            PhotosetPhotoCollection pspc = flickr.PhotosetsGetPhotos(ps.AlbumId);
             var threadFinishEvents = new List<EventWaitHandle>();
 
  
@@ -77,6 +82,9 @@ namespace FlickerBatch_AlbumRetriever
             int i = 0;
             foreach (Photo p in pspc)
             {
+                if (DatabaseHelper.IsImageInDB(p.PhotoId))
+                    continue;
+
                 i++;
                 var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
                 threadFinishEvents.Add(threadFinish);
@@ -86,13 +94,13 @@ namespace FlickerBatch_AlbumRetriever
                     #region Delegate
                     if (result.HasError == false)
                     {
-                        RemoteImageData rid = new RemoteImageData(ps.Title, p.PhotoId, p.Title, result.Result.DateTaken, p.Description);
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, result.Result.DateTaken, p.Description);
                         DatabaseHelper.SaveImageData(rid);
-                        Console.WriteLine("-> " + p.Title + " \t " + ps.Title);
+                        Console.WriteLine("-> " + p.Title + " \t " + ps.Name);
                     }
                     else
                     {
-                        RemoteImageData rid = new RemoteImageData(ps.Title, p.PhotoId, p.Title, DateTime.Today, result.ErrorMessage);
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, DateTime.Today, result.ErrorMessage);
                         DatabaseHelper.SaveImageData(rid);
 
                         Console.WriteLine("Error: " + result.ErrorMessage);
@@ -110,8 +118,11 @@ namespace FlickerBatch_AlbumRetriever
                     i = 0;
                 }
             }
-            Mutex.WaitAll(threadFinishEvents.ToArray());
-            threadFinishEvents.Clear();
+            if (threadFinishEvents.Count > 0)
+            {
+                Mutex.WaitAll(threadFinishEvents.ToArray());
+                threadFinishEvents.Clear();
+            }
             return;
         }
     }

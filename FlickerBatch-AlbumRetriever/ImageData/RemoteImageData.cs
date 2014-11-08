@@ -9,6 +9,8 @@ namespace FlickerBatch_AlbumRetriever.ImageData
     public class RemoteImageData : BaseImageData
     {
         public static String DbTable = "REMOTE_DATA";
+        public static String CheckSQL = "Select count(1) COUNT from REMOTE_DATA where ID='{0}';";
+        public static String InsertSQL = "Insert into REMOTE_DATA (TITLE,DATE_TAKEN,DESCRIPTION,ALBUM,ID) VALUES('{0}','{1}','{2}','{3}', '{4}')";
         String Album { get; set; }
         String PhotoId { get; set; }
         public RemoteImageData(String album, String photoId, String title, DateTime dateTaken, String desc)
@@ -17,14 +19,15 @@ namespace FlickerBatch_AlbumRetriever.ImageData
             Album = album;
             PhotoId = photoId;
         }
-
-        override
-        public String getInsertStatement()
+        
+        public override String getInsertStatement()
         {
-            String insertSQL;
-            insertSQL = String.Format("Insert into {0} (TITLE,DATE_TAKEN,DESCRIPTION,ALBUM,ID) VALUES('{1}','{2}','{3}','{4}', '{5}')",DbTable, Name, DateTaken, Description, Album, PhotoId);
-            return insertSQL;
+            return String.Format(InsertSQL, Name, DateTaken, Description, Album.Replace("'","''"), PhotoId);
         }
 
+        public override string getCheckStatement()
+        {
+            return String.Format(CheckSQL, PhotoId);
+        }
     }
 }
