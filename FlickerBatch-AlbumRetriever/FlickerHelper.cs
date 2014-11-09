@@ -48,7 +48,6 @@ namespace FlickerBatch_AlbumRetriever
             flickr.OAuthAccessTokenSecret = accessToken.TokenSecret;
 
 
-            PhotosetCollection c = flickr.PhotosetsGetList();
 
         }
         public static PhotosetCollection getCollection()
@@ -79,13 +78,13 @@ namespace FlickerBatch_AlbumRetriever
 
  
             List<BaseImageData> retList = new List<BaseImageData>();
-            int i = 0;
+            int unsavedImageCount = 0, batchSaveCount = 0;
             foreach (Photo p in pspc)
             {
                 if (DatabaseHelper.IsImageInDB(p.PhotoId))
                     continue;
 
-                i++;
+                unsavedImageCount++;
                 var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
                 threadFinishEvents.Add(threadFinish);
 
@@ -95,32 +94,45 @@ namespace FlickerBatch_AlbumRetriever
                     if (result.HasError == false)
                     {
                         RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, result.Result.DateTaken, p.Description);
-                        DatabaseHelper.SaveImageData(rid);
-                        Console.WriteLine("-> " + p.Title + " \t " + ps.Name);
+                        lock (retList)
+                        {
+                            retList.Add(rid);
+                            Console.WriteLine("-> " + p.Title + " \t " + ps.Name);
+                        }
+                        //DatabaseHelper.SaveImageData(rid);
                     }
                     else
                     {
                         RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, DateTime.Today, result.ErrorMessage);
-                        DatabaseHelper.SaveImageData(rid);
-
-                        Console.WriteLine("Error: " + result.ErrorMessage);
+ //                       DatabaseHelper.SaveImageData(rid);
+                        lock (retList)
+                        {
+                            retList.Add(rid);
+                            Console.WriteLine("Error: " + ps.Name +" "+ result.ErrorMessage);
+                        }
                     }
                     #endregion
                     threadFinish.Set();
                 }
                 );
 
-                if (i == 60)
+                if (unsavedImageCount == 60)
                 {
+                    batchSaveCount++;
                     Console.WriteLine("\n\n");
                     Mutex.WaitAll(threadFinishEvents.ToArray());
                     threadFinishEvents.Clear();
-                    i = 0;
+                    unsavedImageCount = 0;
+                    Console.WriteLine("Saving Images.. " + (retList.Count + (batchSaveCount * 60)) + "/" + pspc.Count);
+                    DatabaseHelper.SaveImageData(retList);
+                    retList.Clear();
                 }
             }
             if (threadFinishEvents.Count > 0)
             {
                 Mutex.WaitAll(threadFinishEvents.ToArray());
+                Console.WriteLine("Saving Images.. " + (retList.Count + (batchSaveCount * 60)) + "/" + pspc.Count);
+                batchSaveCount = 0;
                 threadFinishEvents.Clear();
             }
             return;

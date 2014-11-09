@@ -15,8 +15,9 @@ namespace FlickerBatch_AlbumRetriever
 {
     class MainClass
     {
-        static bool saveFlickrData = false;
-        static bool saveLocalData = true;
+        static bool saveFlickrData = true;
+        static bool saveLocalData = false;
+        static bool join = true;
         static void Main(string[] args)
         {
 
@@ -44,6 +45,12 @@ namespace FlickerBatch_AlbumRetriever
                 Dictionary<string, string> local_data = DatabaseHelper.loadConfigData("LOCAL");
                 FilesystemHelper.getFileList(local_data["basePath"]);
             }
+
+            if(join)
+            {
+                DatabaseHelper.Join();
+            }
+            Console.WriteLine("=====================       DONE       =====================");
             Console.ReadLine();
 
          }

@@ -31,7 +31,7 @@ namespace FlickerBatch_AlbumRetriever
             Console.WriteLine("Count= " + lidList.Count + "\t Processed Dir: " + baseDir );
             if (lidList.Count > 100)
             {
-                Console.WriteLine("Loaded PicsvCount = " + lidList.Count + " Saving Data");
+                Console.WriteLine("Loaded PicsCount = " + lidList.Count + " Saving Data..");
                 DatabaseHelper.SaveImageData(lidList);
                 lidList.Clear();
             }
