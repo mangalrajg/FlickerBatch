@@ -1,15 +1,17 @@
-﻿using System;
+﻿using FlickerBatch_AlbumRetriever.Generic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlickerBatch_AlbumRetriever.ImageData
+namespace FlickerBatch_AlbumRetriever.Model
 {
     public class FlickrAlbumData
     {
-        public static String InsertSQL = "Insert into " + DatabaseHelper.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,DESCRIPTION) VALUES('{0}','{1}','{2}','{3}')";
+        public static String InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}')";
         public static String CheckSQL = "";
+        
 
         public String AlbumId { get; set; }
         public String Name { get; set; }
@@ -26,7 +28,8 @@ namespace FlickerBatch_AlbumRetriever.ImageData
 
         public String getInsertStatement()
         {
-            return String.Format(InsertSQL, AlbumId, Name.Replace("'", "''"), DateCreated, Description.Replace("'", "''"));
+            return String.Format(InsertSQL, AlbumId, GenericHelper.StringSQLite(Name), GenericHelper.DateTimeSQLite(DateCreated), 
+                GenericHelper.StringSQLite(Description), GenericHelper.DateTimeSQLite(DateTime.Now));
         }
 
         //public override string getCheckStatement()

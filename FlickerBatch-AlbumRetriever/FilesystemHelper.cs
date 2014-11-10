@@ -1,4 +1,4 @@
-﻿using FlickerBatch_AlbumRetriever.ImageData;
+﻿using FlickerBatch_AlbumRetriever.Model;
 using FlickrSync;
 using System;
 using System.Collections.Generic;

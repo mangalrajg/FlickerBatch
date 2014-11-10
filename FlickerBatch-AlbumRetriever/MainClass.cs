@@ -1,4 +1,4 @@
-﻿using FlickerBatch_AlbumRetriever.ImageData;
+﻿using FlickerBatch_AlbumRetriever.Model;
 using FlickrNet;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace FlickerBatch_AlbumRetriever
             {
 
                 Console.WriteLine("Authenticating With Flicker");
-                Dictionary<string, string> auth_data = DatabaseHelper.loadConfigData("AUTH");
+                Dictionary<string, string> auth_data = DatabaseHelper.loadMasterConfigData("AUTH");
                 FlickerHelper.Flickr_Auth(auth_data);
                 DatabaseHelper.saveConfigData("AUTH", auth_data);
             }
@@ -42,7 +42,7 @@ namespace FlickerBatch_AlbumRetriever
             }
             if (saveLocalData)
             {
-                Dictionary<string, string> local_data = DatabaseHelper.loadConfigData("LOCAL");
+                Dictionary<string, string> local_data = DatabaseHelper.loadMasterConfigData("LOCAL");
                 FilesystemHelper.getFileList(local_data["basePath"]);
             }
 

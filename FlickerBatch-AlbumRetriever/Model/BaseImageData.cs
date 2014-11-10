@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlickerBatch_AlbumRetriever.ImageData
+namespace FlickerBatch_AlbumRetriever.Model
 {
     public abstract class BaseImageData
     {

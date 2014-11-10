@@ -1,4 +1,5 @@
-﻿using FlickerBatch_AlbumRetriever.ImageData;
+﻿using FlickerBatch_AlbumRetriever.Generic;
+using FlickerBatch_AlbumRetriever.Model;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -11,39 +12,36 @@ namespace FlickerBatch_AlbumRetriever
 {
     public static class DatabaseHelper
     {
-        public static String MASTER_CONFIG = "MASTER_CONFIG";
-        public static String REMOTE_DATA = "REMOTE_DATA";
-        public static String LOCAL_DATA = "LOCAL_DATA";
-        public static String FLICKR_ALBUMS = "FLICKR_ALBUMS";
-        public static String JOIN = "JOIN_DATA";
-
         private static Object concurrencyObj = new object();
+        private static String dbProvider = "System.Data.SQLite";
+        private static String connectionString = "Data Source=FlickerConfig.sqllite";
         public static void InitiallizeDataStructure()
         {
-            ExecuteNonQuery("CREATE TABLE if not exists " + MASTER_CONFIG +
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.MASTER_CONFIG +
                 "(config_type TEXT, param TEXT, value TEXT);");
 
-            ExecuteNonQuery("CREATE TABLE if not exists " + REMOTE_DATA +
-                "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT, PROCESSED TEXT);");
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.REMOTE_DATA +
+                "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT, PROCESSED TEXT, SYNC_DATE TEXT);");
 
-            ExecuteNonQuery("CREATE TABLE if not exists " + LOCAL_DATA +
-                "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT);");
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.LOCAL_DATA +
+                "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT, SYNC_DATE TEXT);");
 
-            ExecuteNonQuery("CREATE TABLE if not exists " + FLICKR_ALBUMS +
-                "(ID TEXT, NAME TEXT, DATE_CREATED TEXT, DESCRIPTION TEXT);");
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.FLICKR_ALBUMS +
+                "(ID TEXT, NAME TEXT, DATE_CREATED TEXT, DESCRIPTION TEXT, SYNC_DATE TEXT);");
 
-            ExecuteNonQuery("CREATE TABLE if not exists " + JOIN +
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.JOIN +
                 "(NAME TEXT, DATE_TAKEN TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT, COUNT INTEGER);");
 
             return;
         }
 
+
         public static void ExecuteNonQuery(String sql)
         {
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
                 DbCommand cmd = cnn.CreateCommand();
                 cmd.CommandText = sql;
@@ -54,19 +52,19 @@ namespace FlickerBatch_AlbumRetriever
 
         }
 
-        public static Dictionary<string, string> loadConfigData(string config_type)
+        public static Dictionary<string, string> loadMasterConfigData(string config_type)
         {
             Dictionary<string, string> retConfigData = new Dictionary<string, string>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
-                using (SQLiteCommand mycommand = new SQLiteCommand((SQLiteConnection)cnn))
+                using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
                     mycommand.CommandText = "select * from MASTER_CONFIG where config_type ='" + config_type + "';";
-                    SQLiteDataReader reader = mycommand.ExecuteReader();
+                    DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
                         Console.WriteLine("Parameter: " + reader["param"] + "\tValue: " + reader["value"]);
@@ -93,10 +91,10 @@ namespace FlickerBatch_AlbumRetriever
 
         internal static void SaveImageData(List<BaseImageData> pList)
         {
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
                 DbCommand cmd = cnn.CreateCommand();
                 using (var transaction = cnn.BeginTransaction())
@@ -122,7 +120,7 @@ namespace FlickerBatch_AlbumRetriever
             }
         }
 
-        internal static bool IsImageInDB(String photoId)
+        internal static bool IsRemoteImageInDB(String photoId)
         {
             bool isImageInDb = false;
             lock (concurrencyObj)
@@ -136,16 +134,16 @@ namespace FlickerBatch_AlbumRetriever
         public static bool ExecuteCheckSQL(string sql)
         {
             Boolean ret = false;
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
-                using (SQLiteCommand mycommand = new SQLiteCommand((SQLiteConnection)cnn))
+                using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
                     mycommand.CommandText = sql;
-                    SQLiteDataReader reader = mycommand.ExecuteReader();
+                    DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
                         ret = (Int64)reader["COUNT"] > 0 ? true : false;
@@ -161,23 +159,23 @@ namespace FlickerBatch_AlbumRetriever
         internal static List<FlickrAlbumData> LoadFlickerAlbums()
         {
             List<FlickrAlbumData> fadList = new List<FlickrAlbumData>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
-                using (SQLiteCommand mycommand = new SQLiteCommand((SQLiteConnection)cnn))
+                using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = "select * from " + FLICKR_ALBUMS + ";";
-                    SQLiteDataReader reader = mycommand.ExecuteReader();
+                    mycommand.CommandText = "select * from " + TableNames.FLICKR_ALBUMS + ";";
+                    DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
                         var albumid = reader.GetString(0);
                         var name = reader.GetString(1);
                         var date_created = reader.GetString(2);
                         var desc = reader.GetString(3);
-                        DateTime dt = DateTime.Parse(date_created);
+                        DateTime dt = GenericHelper.DateTimeSQLite(date_created);
 
                         fadList.Add(new FlickrAlbumData(albumid, name, dt, desc));
                     }
@@ -191,43 +189,49 @@ namespace FlickerBatch_AlbumRetriever
 
         internal static void SaveFlickerAlbums(List<FlickrAlbumData> fadList)
         {
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
-                DbCommand cmd = cnn.CreateCommand();
-                foreach (FlickrAlbumData fad in fadList)
+                using (var transaction = cnn.BeginTransaction())
                 {
-                    cmd.CommandText = fad.getInsertStatement();
-                    cmd.ExecuteNonQuery();
+                    DbCommand cmd = cnn.CreateCommand();
+                    foreach (FlickrAlbumData fad in fadList)
+                    {
+                        cmd.CommandText = fad.getInsertStatement();
+                        cmd.ExecuteNonQuery();
 
+                    }
+                    transaction.Commit();
                 }
+                
                 cnn.Close();
             }
         }
 
         internal static void Join()
         {
-            DbProviderFactory fact = DbProviderFactories.GetFactory("System.Data.SQLite");
+            
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
 
-            String getLocalDataSQL = "select * from " + LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
-            String UpdateRemoteDataSQL = "UPDATE " + REMOTE_DATA + " SET PROCESSED='Y' where TITLE = '{0}' and DATE_TAKEN='{1}';";
-            String UpdateLocalDataSQL = "UPDATE " + LOCAL_DATA + "  SET PROCESSED='Y' where FILENAME = '{0}' and DATE_TAKEN='{1}';";
-            String InsertSQL = "Insert into " + DatabaseHelper.JOIN + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
+            String getLocalDataSQL = "select * from " + TableNames.LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
+            String UpdateRemoteDataSQL = "UPDATE " + TableNames.REMOTE_DATA + " SET PROCESSED='Y' where TITLE = '{0}' and DATE_TAKEN='{1}';";
+            String UpdateLocalDataSQL = "UPDATE " + TableNames.LOCAL_DATA + "  SET PROCESSED='Y' where FILENAME = '{0}' and DATE_TAKEN='{1}';";
+            String InsertSQL = "Insert into " + TableNames.JOIN + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
 
             //String checkRemoteSQL = "select count(*) COUNT from " + LOCAL_DATA + " where FILENAME = '{0}' and DATE_TAKEN='{1}';";
             //String getLocalPathSQL = "select PATH from " + LOCAL_DATA + " where FILENAME = '{0}' and DATE_TAKEN='{1}';";
             using (DbConnection cnn = fact.CreateConnection())
             {
-                cnn.ConnectionString = "Data Source=FlickerConfig.sqllite";
+                cnn.ConnectionString = connectionString;
                 cnn.Open();
                 
                 DbCommand cmd = cnn.CreateCommand();
                 var transaction = cnn.BeginTransaction();
                 {
 
-                    cmd.CommandText = "select * from " + REMOTE_DATA + " WHERE PROCESSED='N';";
+                    cmd.CommandText = "select * from " + TableNames.REMOTE_DATA + " WHERE PROCESSED='N';";
                     int imageCount = 0;
                     DbDataReader remoteDataReader = cmd.ExecuteReader();
                     while (remoteDataReader.Read())
