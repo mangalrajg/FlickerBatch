@@ -17,6 +17,7 @@ namespace FlickerBatch_AlbumRetriever
         public static Flickr flickr = null;
         static String ApiKey = "6c5f9affbbd5f9f96054300504900e92";
         static String SharedSecret = "c9fbcf157653bcd9";
+        private static List<EventWaitHandle> threadFinishEvents = new List<EventWaitHandle>();
 
         public static void Flickr_Auth(Dictionary<string, string> auth_data)
         {
@@ -57,7 +58,7 @@ namespace FlickerBatch_AlbumRetriever
                 PhotosetCollection psc = flickr.PhotosetsGetList(); 
                 foreach (Photoset ps in psc)
                 {
-                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.Description);
+                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos,ps.Description, DateTime.Now);
                     retPs.Add(fad);
                 }
                 Console.WriteLine("Saving Albums in local DB ..... ");
@@ -144,8 +145,8 @@ namespace FlickerBatch_AlbumRetriever
             return;
         }
 #endregion
-
-        public static void savePictures(FlickrAlbumData ps)
+        #region OLD2
+        public static void savePictures_OLD2(FlickrAlbumData ps)
         {
             int numPage = 0;
             PhotosetPhotoCollection pspc = null;
@@ -179,6 +180,72 @@ namespace FlickerBatch_AlbumRetriever
 
             return;
         }
+        #endregion
 
+        public static void savePictures(FlickrAlbumData ps)
+        {
+            int numPage = 0;
+            while (ps.NumberOfPhotos > numPage * 500  )
+            {
+                numPage++;
+                Console.WriteLine("Loading Album Info(Async): " + ps.Name);
+                var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
+                threadFinishEvents.Add(threadFinish);
+                flickr.PhotosetsGetPhotosAsync(ps.AlbumId, PhotoSearchExtras.All, numPage, 500, delegate(FlickrResult<PhotosetPhotoCollection> result)
+                {
+                    if (result.HasError == false)
+                    {
+                        List<BaseImageData> retList; 
+                        List<BaseImageData> allPics = new List<BaseImageData>();
+                        foreach (Photo p in result.Result)
+                        {
+                            RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
+                            allPics.Add(rid);
+                        }
+
+                        retList = DatabaseHelper.getPhotosToSave(allPics);
+                        if (retList.Count > 0)
+                        {
+                            DatabaseHelper.SaveImageData(retList);
+                            Console.WriteLine("Saving Album Info(Async): " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Nothing to save in Album : " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
+                        }
+                        retList.Clear();
+                    }
+                    else
+                    {
+                        Console.WriteLine("==============================================================");
+                        Console.WriteLine("Error Retrieving Album Info(Async): " + ps.Name + " Count = " + ps.NumberOfPhotos);
+                        Console.WriteLine("==============================================================");
+
+                    }
+                    threadFinish.Set();
+
+                }
+                );
+
+                if (threadFinishEvents.Count > 60)
+                {
+                    Mutex.WaitAll(threadFinishEvents.ToArray(),150000);
+                    threadFinishEvents.Clear();
+                }
+            }
+
+            return;
+        }
+
+
+
+        internal static void WaitForAllThreads()
+        {
+            if (threadFinishEvents.Count > 0)
+            {
+                Mutex.WaitAll(threadFinishEvents.ToArray());
+                threadFinishEvents.Clear();
+            }
+        }
     }
 }

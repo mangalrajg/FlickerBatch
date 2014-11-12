@@ -27,7 +27,7 @@ namespace FlickerBatch_AlbumRetriever
                 "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT, SYNC_DATE TEXT);");
 
             ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.FLICKR_ALBUMS +
-                "(ID TEXT, NAME TEXT, DATE_CREATED TEXT, DESCRIPTION TEXT, SYNC_DATE TEXT);");
+                "(ID TEXT, NAME TEXT, DATE_CREATED TEXT,NUM_PICS INTEGER, DESCRIPTION TEXT, SYNC_DATE TEXT);");
 
             ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.JOIN +
                 "(NAME TEXT, DATE_TAKEN TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT, COUNT INTEGER);");
@@ -91,25 +91,31 @@ namespace FlickerBatch_AlbumRetriever
 
         internal static void SaveImageData(List<BaseImageData> pList)
         {
-            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
-            using (DbConnection cnn = fact.CreateConnection())
+            lock (concurrencyObj)
             {
-                cnn.ConnectionString = connectionString;
-                cnn.Open();
-                DbCommand cmd = cnn.CreateCommand();
-                using (var transaction = cnn.BeginTransaction())
+                Console.WriteLine("Got lock: SaveImageData");
+                DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+                using (DbConnection cnn = fact.CreateConnection())
                 {
-                    foreach (BaseImageData bid in pList)
+                    cnn.ConnectionString = connectionString;
+                    cnn.Open();
+                    DbCommand cmd = cnn.CreateCommand();
+                    using (var transaction = cnn.BeginTransaction())
                     {
-                        cmd.CommandText = bid.getInsertStatement();
-                        cmd.ExecuteNonQuery();
-                        Console.Write(".");
+                        foreach (BaseImageData bid in pList)
+                        {
+                            cmd.CommandText = bid.getInsertStatement();
+                            cmd.ExecuteNonQuery();
+                            Console.Write(".");
 
+                        }
+                        transaction.Commit();
                     }
-                    transaction.Commit();
+                    Console.WriteLine("");
+                    cnn.Close();
                 }
-                Console.WriteLine("");
-                cnn.Close();
+                Console.WriteLine("Releasing lock: SaveImageData");
+
             }
         }
         internal static void SaveImageData(BaseImageData bid)
@@ -119,6 +125,42 @@ namespace FlickerBatch_AlbumRetriever
                 ExecuteNonQuery(bid.getInsertStatement());
             }
         }
+        internal static List<BaseImageData> getPhotosToSave(List<BaseImageData> imageList)
+        {
+            List<BaseImageData> retList = new List<BaseImageData>();
+            //lock (concurrencyObj)
+            {
+                DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+                using (DbConnection cnn = fact.CreateConnection())
+                {
+                    cnn.ConnectionString = connectionString;
+                    cnn.Open();
+                    using (DbCommand mycommand = cnn.CreateCommand())
+                    {
+                        foreach (BaseImageData image in imageList)
+                        {
+                            mycommand.CommandText = image.getCheckStatement();
+                            DbDataReader reader = mycommand.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                if ((Int64)reader["COUNT"] > 0)
+                                {
+                                }
+                                else
+                                {
+                                    retList.Add(image);
+                                }
+                            }
+                            reader.Close();
+                        }
+
+                    }
+                    cnn.Close();
+                }
+            }
+            return retList;
+        }
+
 
         internal static bool IsRemoteImageInDB(String photoId)
         {
@@ -171,13 +213,13 @@ namespace FlickerBatch_AlbumRetriever
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
-                        var albumid = reader.GetString(0);
-                        var name = reader.GetString(1);
-                        var date_created = reader.GetString(2);
-                        var desc = reader.GetString(3);
-                        DateTime dt = GenericHelper.DateTimeSQLite(date_created);
-
-                        fadList.Add(new FlickrAlbumData(albumid, name, dt, desc));
+                        String albumid = (String)reader["ID"];
+                        String name = (String)reader["NAME"];
+                        String date_created = (String)reader["DATE_CREATED"];
+                        int num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
+                        String desc = (String)reader["DESCRIPTION"];
+                        String sync_date = (String)reader["SYNC_DATE"];
+                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), num_pics, desc, GenericHelper.DateTimeSQLite(sync_date)));
                     }
 
                 }
@@ -205,14 +247,14 @@ namespace FlickerBatch_AlbumRetriever
                     }
                     transaction.Commit();
                 }
-                
+
                 cnn.Close();
             }
         }
 
         internal static void Join()
         {
-            
+
             DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
 
             String getLocalDataSQL = "select * from " + TableNames.LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
@@ -226,7 +268,7 @@ namespace FlickerBatch_AlbumRetriever
             {
                 cnn.ConnectionString = connectionString;
                 cnn.Open();
-                
+
                 DbCommand cmd = cnn.CreateCommand();
                 var transaction = cnn.BeginTransaction();
                 {
@@ -270,7 +312,7 @@ namespace FlickerBatch_AlbumRetriever
                     }
                     transaction.Commit();
                     Console.WriteLine("Done....");
-          
+
                 }
                 cnn.Close();
             }

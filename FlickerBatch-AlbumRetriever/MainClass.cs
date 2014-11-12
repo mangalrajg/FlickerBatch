@@ -15,7 +15,7 @@ namespace FlickerBatch_AlbumRetriever
 {
     class MainClass
     {
-        static bool saveFlickrData = true;
+        static bool saveFlickrData = false;
         static bool saveLocalData = false;
         static bool join = true;
         static void Main(string[] args)
@@ -25,20 +25,23 @@ namespace FlickerBatch_AlbumRetriever
             if (saveFlickrData)
             {
 
-                Console.WriteLine("Authenticating With Flicker");
                 Dictionary<string, string> auth_data = DatabaseHelper.loadMasterConfigData("AUTH");
+                Console.WriteLine("Authenticating With Flicker");
                 FlickerHelper.Flickr_Auth(auth_data);
+                Console.WriteLine("Saving Auth Info..");
                 DatabaseHelper.saveConfigData("AUTH", auth_data);
             }
             if (saveFlickrData)
             {
                 Console.WriteLine("Download Photo Info from Flicker");
-
                 List<FlickrAlbumData> psList = FlickerHelper.getAllAlbums();
                 foreach (FlickrAlbumData ps in psList)
                 {
                     FlickerHelper.savePictures(ps);                    
                 }
+                FlickerHelper.WaitForAllThreads();
+
+
             }
             if (saveLocalData)
             {
