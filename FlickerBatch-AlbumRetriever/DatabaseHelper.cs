@@ -1,7 +1,8 @@
-﻿using FlickerBatch_AlbumRetriever.Generic;
+﻿using baseLibrary.Generic;
 using FlickerBatch_AlbumRetriever.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
@@ -93,7 +94,7 @@ namespace FlickerBatch_AlbumRetriever
         {
             lock (concurrencyObj)
             {
-                Console.WriteLine("Got lock: SaveImageData");
+        //        Console.WriteLine("Got lock: SaveImageData");
                 DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
                 using (DbConnection cnn = fact.CreateConnection())
                 {
@@ -114,7 +115,7 @@ namespace FlickerBatch_AlbumRetriever
                     Console.WriteLine("");
                     cnn.Close();
                 }
-                Console.WriteLine("Releasing lock: SaveImageData");
+          //      Console.WriteLine("Releasing lock: SaveImageData");
 
             }
         }
@@ -317,6 +318,12 @@ namespace FlickerBatch_AlbumRetriever
                 cnn.Close();
             }
 
+        }
+
+        internal static void removePrefix(string p)
+        {
+            ExecuteNonQuery(String.Format("update " + TableNames.LOCAL_DATA + " set PATH=substr(PATH,{0}) where PATH like '{1}%'",p.Length+2,p));
+            //ExecuteNonQuery(String.Format("update " + TableNames.REMOTE_DATA + " set ALBUM=substr(ALBUM,{0}) where ALBUM like '{1}%'", p.Length + 2, p));
         }
     }
 }

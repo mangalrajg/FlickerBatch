@@ -10,6 +10,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlickerBatch-AlbumRetriever", "FlickerBatch-AlbumRetriever\FlickerBatch-AlbumRetriever.csproj", "{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flickr-UI", "Flickr-UI\Flickr-UI.csproj", "{84607AD9-14CB-404D-AB72-5DDF36C9335A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "baseLibrary", "baseLibrary\baseLibrary.csproj", "{4DC2CB36-E435-4D01-84D5-24E908138492}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +24,14 @@ Global
 		{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84607AD9-14CB-404D-AB72-5DDF36C9335A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84607AD9-14CB-404D-AB72-5DDF36C9335A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84607AD9-14CB-404D-AB72-5DDF36C9335A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84607AD9-14CB-404D-AB72-5DDF36C9335A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DC2CB36-E435-4D01-84D5-24E908138492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DC2CB36-E435-4D01-84D5-24E908138492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DC2CB36-E435-4D01-84D5-24E908138492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DC2CB36-E435-4D01-84D5-24E908138492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

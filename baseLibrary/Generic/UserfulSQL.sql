@@ -44,3 +44,20 @@
       INSTR(DATE_TAKEN, ':') AS s4 
   ))
 );
+
+
+update remote_DATA set album=substr(album,39) where album like 'C:\Users\Mangalraj\Desktop\share\pics%';
+
+select filename, date_taken, size, count(1) COUNT from local_data group by 
+filename, date_taken, size
+having count(1) >1
+order by count(1) desc
+
+-- Show Duplicates
+select l1.filename, l1.date_taken, l1.path, l2.path, l1.size from local_data l1, local_data l2 where
+l1.filename = l2.filename and
+l1.date_taken = l2.date_taken and
+l1.size = l2.size and 
+l1.path != l2.path
+order by l1.FILENAME desc
+

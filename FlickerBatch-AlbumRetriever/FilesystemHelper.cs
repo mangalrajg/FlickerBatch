@@ -23,10 +23,23 @@ namespace FlickerBatch_AlbumRetriever
             foreach (String fileName in fileList)
             {
                 FileInfo fi = new FileInfo(fileName);
-                ImageInfo ii = new ImageInfo();
-                ii.Load(fileName, ImageInfo.FileTypes.FileTypeUnknown);
-                LocalImageData lid = new LocalImageData(fi.Name, ii.GetDateTaken(), ii.GetDescription(), fi.FullName, fi.Length);
-                lidList.Add(lid);
+                if (fileName.EndsWith(".jpg", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".avi", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".bmp", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".mov", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".tif", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".3gp", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".mpg", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".mp4", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".png", System.StringComparison.CurrentCultureIgnoreCase) ||
+                    fileName.EndsWith(".wmv", System.StringComparison.CurrentCultureIgnoreCase) 
+)
+                {
+                    ImageInfo ii = new ImageInfo();
+                    ii.Load(fileName, ImageInfo.FileTypes.FileTypeUnknown);
+                    LocalImageData lid = new LocalImageData(fi.Name, ii.GetDateTaken(), ii.GetDescription(), fi.DirectoryName, fi.Length);
+                    lidList.Add(lid);
+                }
             }
             Console.WriteLine("Count= " + lidList.Count + "\t Processed Dir: " + baseDir );
             if (lidList.Count > 100)

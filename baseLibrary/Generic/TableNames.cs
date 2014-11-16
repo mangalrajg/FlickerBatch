@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlickerBatch_AlbumRetriever.Generic
+namespace baseLibrary.Generic
 {
     public static class TableNames
     {

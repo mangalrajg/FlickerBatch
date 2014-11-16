@@ -1,4 +1,4 @@
-﻿using FlickerBatch_AlbumRetriever.Generic;
+﻿using baseLibrary.Generic;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -67,8 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FilesystemHelper.cs" />
-    <Compile Include="Generic\GenericHelper.cs" />
-    <Compile Include="Generic\TableNames.cs" />
     <Compile Include="Model\FlickrAlbumData.cs" />
     <Compile Include="Model\BaseImageData.cs" />
     <Compile Include="DatabaseHelper.cs" />
@@ -100,7 +98,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Generic\TextFile1.sql" />
+    <ProjectReference Include="..\baseLibrary\baseLibrary.csproj">
+      <Project>{4dc2cb36-e435-4d01-84d5-24e908138492}</Project>
+      <Name>baseLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
