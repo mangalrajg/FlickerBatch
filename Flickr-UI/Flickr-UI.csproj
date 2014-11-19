@@ -15,7 +15,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -42,6 +42,7 @@
     <Reference Include="System.Data.SQLite, Version=1.0.94.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\System.Data.SQLite.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Controls.Ribbon" />
     <Reference Include="System.Xml" />
@@ -61,13 +62,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DatabaseHelper.cs" />
-    <Compile Include="DuplicateImages.cs" />
+    <Compile Include="Views\AlbumRenameView.xaml.cs">
+      <DependentUpon>AlbumRenameView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\AlbumRenameViewModel.cs" />
+    <Compile Include="ViewModel\DuplicateImagesViewModel.cs" />
+    <Compile Include="Views\DuplicateImageView.xaml.cs">
+      <DependentUpon>DuplicateImageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DuplicatesCommand.cs" />
-    <Compile Include="DuplicateImageData.cs" />
     <Compile Include="StaticCommands.cs" />
-    <Compile Include="ViewModel.cs" />
-    <Compile Include="ViewModelBase.cs" />
+    <Compile Include="ViewModel\ViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelBase.cs" />
+    <Page Include="Views\AlbumRenameView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DuplicateImageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -125,6 +139,9 @@
       <Project>{4dc2cb36-e435-4d01-84d5-24e908138492}</Project>
       <Name>baseLibrary</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\upload.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

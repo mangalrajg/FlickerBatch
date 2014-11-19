@@ -28,7 +28,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -67,15 +67,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FilesystemHelper.cs" />
-    <Compile Include="Model\FlickrAlbumData.cs" />
-    <Compile Include="Model\BaseImageData.cs" />
-    <Compile Include="DatabaseHelper.cs" />
     <Compile Include="FlickerHelper.cs" />
-    <Compile Include="Model\LocalImageData.cs" />
     <Compile Include="ImageInfo.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Model\RemoteImageData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

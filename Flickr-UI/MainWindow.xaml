@@ -11,19 +11,22 @@
                     <RibbonButton  LargeImageSource="images/load.png" Content="Load"  />
                 </RibbonGroup>
                 <RibbonGroup Header="Actions" >
-                    <RibbonButton  LargeImageSource="images/duplicates.png" Content="Find Duplicates" Command="{Binding DuplicatesCommand}" />
+                    <RibbonButton  LargeImageSource="images/duplicates.png" Label="Find Duplicates" Command="{Binding DuplicatesCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                 </RibbonGroup>
 
             </RibbonTab>
 
             <RibbonTab Header="Flicker">
                 <RibbonGroup Header="Connect" >
-                    <RibbonButton  LargeImageSource="images/flickr.png"  />
+                    <RibbonButton  LargeImageSource="images/flickr.png"  Label="Connect"/>
+                    <RibbonButton  LargeImageSource="images/upload.png" Label="Upload" Command="{Binding UploadCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>
         <Grid Name="MainGrid" DockPanel.Dock="Bottom">
-            <DataGrid ItemsSource="{Binding DuplicateImageCollection}" AutoGenerateColumns="False" SelectionMode="Extended" >
+            <!--<DataGrid ItemsSource="{Binding DuplicateImageCollection}" AutoGenerateColumns="False" SelectionMode="Extended" 
+                      RowDetailsVisibilityMode="VisibleWhenSelected" Name="DuplicateManager">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Source" Binding="{Binding SourcePath}" />
                     <DataGridTextColumn Header="Destination" Binding="{Binding DestinationPath}" />
@@ -31,18 +34,32 @@
                     <DataGridTemplateColumn Header="Action" Width="SizeToCells" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button Content="Move" Click="Move_Images" Command="local:StaticCommands.DoSomethingCommand" CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=DataContext}"/>
+                                <Button Content="Move" Command="local:StaticCommands.DoSomethingCommand" CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=DataContext}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
                 <DataGrid.RowDetailsTemplate>
                     <DataTemplate>
-                        <DataGrid Height="100" ItemsSource="{Binding ImageDetails}" >
+                        <DataGrid MaxHeight="400" ItemsSource="{Binding ImageDetails}"  AutoGenerateColumns="False" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" />
+                                <DataGridTextColumn Header="Date Taken" Binding="{Binding DateTaken}" />
+                                <DataGridTextColumn Header="Source" Binding="{Binding SourcePath}" />
+                                <DataGridTextColumn Header="Destination" Binding="{Binding DestinationPath}" />
+                                <DataGridTextColumn  Header="Size" Binding="{Binding Size}"  />
+                                <DataGridTemplateColumn Header="Action" Width="SizeToCells" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding ImageData}"  />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
                         </DataGrid>
                     </DataTemplate>
                 </DataGrid.RowDetailsTemplate>
-            </DataGrid>
+            </DataGrid>-->
         </Grid>
     </DockPanel>
 </RibbonWindow>

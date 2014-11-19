@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Ribbon;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -17,20 +16,13 @@ using System.Windows.Shapes;
 namespace Flickr_UI
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for DuplicateImageView.xaml
     /// </summary>
-    public partial class MainWindow : RibbonWindow
+    public partial class DuplicateImageView : DataGrid
     {
-        public MainWindow()
+        public DuplicateImageView()
         {
             InitializeComponent();
-            this.DataContext = new ViewModel();
-            
-        }
-
-        private void Move_Images(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

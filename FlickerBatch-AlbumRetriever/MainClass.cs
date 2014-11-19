@@ -1,4 +1,5 @@
-﻿using FlickerBatch_AlbumRetriever.Model;
+﻿using baseLibrary.DBInterface;
+using FlickerBatch_AlbumRetriever.Model;
 using FlickrNet;
 using System;
 using System.Collections.Generic;

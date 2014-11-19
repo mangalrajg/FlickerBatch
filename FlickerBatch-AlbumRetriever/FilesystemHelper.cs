@@ -1,4 +1,5 @@
-﻿using FlickerBatch_AlbumRetriever.Model;
+﻿using baseLibrary.DBInterface;
+using FlickerBatch_AlbumRetriever.Model;
 using FlickrSync;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,21 @@ namespace FlickerBatch_AlbumRetriever
                 DatabaseHelper.SaveImageData(lidList);
                 lidList.Clear();
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             return lidList;
         }
     }
