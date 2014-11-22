@@ -46,9 +46,9 @@ namespace FlickerBatch_AlbumRetriever
             }
             if (saveLocalData)
             {
-                Dictionary<string, string> local_data = DatabaseHelper.loadMasterConfigData("LOCAL");                
-                FilesystemHelper.getFileList(local_data["basePath"]);
-                DatabaseHelper.removePrefix(local_data["basePath"]);
+                Dictionary<string, string> local_data = DatabaseHelper.loadMasterConfigData("LOCAL");
+                FilesystemHelper.getFileList(local_data["LocalBasePath"]);
+                DatabaseHelper.removePrefix(local_data["LocalBasePath"]);
             }
 
             if(join)

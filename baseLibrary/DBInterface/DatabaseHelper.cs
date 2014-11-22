@@ -38,26 +38,26 @@ namespace baseLibrary.DBInterface
         {
             DataTable table = DbProviderFactories.GetFactoryClasses();
 
-            // Display each row and column value. 
-            foreach (DataRow row in table.Rows)
-            {
-                foreach (DataColumn column in table.Columns)
-                {
-                    Console.WriteLine(column.ToString() + "=" + row[column]);
-                }
-                Console.WriteLine("=====================");
-            }
-            try
-            {
-                var dataSet = ConfigurationManager.GetSection("system.data") as System.Data.DataSet;
-                dataSet.Tables[0].Rows.Add("SQLite Data Provider"
-                , ".Net Framework Data Provider for SQLite"
-                , "System.Data.SQLite"
-                , "System.Data.SQLite.SQLiteFactory, System.Data.SQLite");
-            }
-            catch (System.Data.ConstraintException)
-            {
-            }
+            //// Display each row and column value. 
+            //foreach (DataRow row in table.Rows)
+            //{
+            //    foreach (DataColumn column in table.Columns)
+            //    {
+            //        Console.WriteLine(column.ToString() + "=" + row[column]);
+            //    }
+            //    Console.WriteLine("=====================");
+            //}
+            //try
+            //{
+            //    var dataSet = ConfigurationManager.GetSection("system.data") as System.Data.DataSet;
+            //    dataSet.Tables[0].Rows.Add("SQLite Data Provider"
+            //    , ".Net Framework Data Provider for SQLite"
+            //    , "System.Data.SQLite"
+            //    , "System.Data.SQLite.SQLiteFactory, System.Data.SQLite");
+            //}
+            //catch (System.Data.ConstraintException)
+            //{
+            //}
 
         }
         public static void InitiallizeDataStructure()
@@ -328,8 +328,6 @@ namespace baseLibrary.DBInterface
                         String localPath = "";
                         DbCommand cmd2 = cnn.CreateCommand();
                         cmd2.CommandText = String.Format(getLocalDataSQL, title, dateTaken);
-
-
                         DbDataReader localDataReader = cmd2.ExecuteReader();
                         int count = 0;
                         while (localDataReader.Read())
@@ -339,11 +337,11 @@ namespace baseLibrary.DBInterface
                         }
 
                         DbCommand cmd3 = cnn.CreateCommand();
-                        cmd3.CommandText = String.Format(UpdateRemoteDataSQL, title.Replace("'", "''"), dateTaken);
+                        cmd3.CommandText = String.Format(UpdateRemoteDataSQL, GenericHelper.StringSQLite(title), dateTaken);
                         cmd3.ExecuteNonQuery();
-                        cmd3.CommandText = String.Format(UpdateLocalDataSQL, title.Replace("'", "''"), dateTaken);
+                        cmd3.CommandText = String.Format(UpdateLocalDataSQL, GenericHelper.StringSQLite(title), dateTaken);
                         cmd3.ExecuteNonQuery();
-                        cmd3.CommandText = String.Format(InsertSQL, title.Replace("'", "''"), dateTaken, flickerPath.Replace("'", "''"), localPath.Replace("'", "''"), count);
+                        cmd3.CommandText = String.Format(InsertSQL, title.Replace("'", "''"), dateTaken, GenericHelper.StringSQLite(flickerPath), GenericHelper.StringSQLite(localPath), count);
                         cmd3.ExecuteNonQuery();
                         Console.WriteLine(imageCount + ". Title: " + title + "\t Count=" + count);
                         if (imageCount % 100 == 0)
@@ -393,8 +391,6 @@ namespace baseLibrary.DBInterface
             }
             return duplicateImgList;
         }
-
-
         public static List<DuplicateImages> loadDuplicateImages(string SourcePath, string DestinationPath)
         {
             List<DuplicateImages> duplicateImgList = new List<DuplicateImages>();

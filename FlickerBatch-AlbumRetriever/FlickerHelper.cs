@@ -25,9 +25,9 @@ namespace FlickerBatch_AlbumRetriever
             flickr = new Flickr(ApiKey, SharedSecret);
             String accessTokenStr = "";
             OAuthAccessToken accessToken = null;
-            if (auth_data.ContainsKey("accessTokenStr"))
+            if (auth_data.ContainsKey("AccessTokenStr"))
             {
-                accessTokenStr = auth_data["accessTokenStr"];
+                accessTokenStr = auth_data["AccessTokenStr"];
                 XmlSerializer writer = new XmlSerializer(typeof(OAuthAccessToken));
                 StringReader sr = new StringReader(accessTokenStr);
                 accessToken = (OAuthAccessToken)writer.Deserialize(sr);
@@ -43,7 +43,8 @@ namespace FlickerBatch_AlbumRetriever
                 XmlSerializer writer = new XmlSerializer(typeof(OAuthAccessToken));
                 StringWriter sw = new StringWriter();
                 writer.Serialize(sw, accessToken);
-                auth_data["accessTokenStr"] = sw.ToString();
+                auth_data["AuthToken"] = AuthToken;
+                auth_data["AccessTokenStr"] = sw.ToString();
 
             }
             flickr.OAuthAccessToken = accessToken.Token;
@@ -67,121 +68,6 @@ namespace FlickerBatch_AlbumRetriever
             }
             return retPs;
         }
-//#region OLD
-//        public static void savePictures_OLD(FlickrAlbumData ps)
-//        {
-//            int numPage = 1;
-//            PhotosetPhotoCollection pspc = null;
-
-//            do
-//            {
-//                pspc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
-//                var threadFinishEvents = new List<EventWaitHandle>();
-
-
-//                List<BaseImageData> retList = new List<BaseImageData>();
-//                int unsavedImageCount = 0, batchSaveCount = 0, skippedImageCount = 0;
-//                foreach (Photo p in pspc)
-//                {
-//                    if (DatabaseHelper.IsRemoteImageInDB(p.PhotoId))
-//                    {
-//                        skippedImageCount++;
-//                        continue;
-//                    }
-
-//                    unsavedImageCount++;
-//                    var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
-//                    threadFinishEvents.Add(threadFinish);
-
-//                    flickr.PhotosGetInfoAsync(p.PhotoId, p.Secret, delegate(FlickrResult<PhotoInfo> result)
-//                    {
-//                        #region Delegate
-//                        if (result.HasError == false)
-//                        {
-//                            RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, result.Result.DateTaken, p.Description);
-//                            lock (retList)
-//                            {
-//                                retList.Add(rid);
-//                                Console.WriteLine("-> " + p.Title + " \t " + ps.Name);
-//                            }
-//                            //DatabaseHelper.SaveImageData(rid);
-//                        }
-//                        else
-//                        {
-//                            RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, DateTime.Today, result.ErrorMessage);
-//                            //                       DatabaseHelper.SaveImageData(rid);
-//                            lock (retList)
-//                            {
-//                                retList.Add(rid);
-//                                Console.WriteLine("Error: " + ps.Name + " " + result.ErrorMessage);
-//                            }
-//                        }
-//                        #endregion
-//                        threadFinish.Set();
-//                    }
-//                    );
-
-//                    if (unsavedImageCount == 60)
-//                    {
-//                        batchSaveCount++;
-//                        Console.WriteLine("\n\n");
-//                        Mutex.WaitAll(threadFinishEvents.ToArray());
-//                        threadFinishEvents.Clear();
-//                        unsavedImageCount = 0;
-//                        Console.WriteLine("Saving Images.. " + (retList.Count + skippedImageCount + (batchSaveCount * 60)) + "/" + pspc.Count);
-//                        DatabaseHelper.SaveImageData(retList);
-//                        retList.Clear();
-//                    }
-//                }
-//                if (threadFinishEvents.Count > 0)
-//                {
-//                    Mutex.WaitAll(threadFinishEvents.ToArray());
-//                    Console.WriteLine("Saving Images.. " + (retList.Count + skippedImageCount + (batchSaveCount * 60)) + "/" + pspc.Count);
-//                    batchSaveCount = 0;
-//                    DatabaseHelper.SaveImageData(retList);
-//                    threadFinishEvents.Clear();
-//                }
-//            }
-//            while (pspc.Count == 500);
-//            return;
-//        }
-//#endregion
-//        #region OLD2
-//        public static void savePictures_OLD2(FlickrAlbumData ps)
-//        {
-//            int numPage = 0;
-//            PhotosetPhotoCollection pspc = null;
-//            do
-//            {
-//                numPage++;
-//                Console.Write("Loading Album Info: " + ps.Name );
-//                pspc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
-//                Console.WriteLine("  Picture Count = " + pspc.Count);
-//                List<BaseImageData> retList = new List<BaseImageData>();
-//                int unsavedImageCount = 0, skippedImageCount = 0;
-//                foreach (Photo p in pspc)
-//                {
-//                    if (DatabaseHelper.IsRemoteImageInDB(p.PhotoId))
-//                    {
-//                        skippedImageCount++;
-//                        Console.WriteLine("Photo Already in DB. Skipping :" + p.Title);
-//                        continue;
-//                    }
-
-//                    unsavedImageCount++;
-//                    RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
-//                    retList.Add(rid);
-//                    Console.WriteLine("-> " + p.Title + " \t " + ps.Name);  
-//                }
-//                Console.WriteLine("Saving " + retList.Count + "/" + pspc.Count +  " Album: " + ps.Name + " Page= " + numPage );
-//                DatabaseHelper.SaveImageData(retList);
-//                retList.Clear();
-//            }
-//            while (pspc.Count == 500);
-
-//            return;
-//        }
-//        #endregion
 
         public static void savePictures(FlickrAlbumData ps)
         {

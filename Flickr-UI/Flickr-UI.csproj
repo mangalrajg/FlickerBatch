@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{84607AD9-14CB-404D-AB72-5DDF36C9335A}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Flickr_UI</RootNamespace>
     <AssemblyName>Flickr-UI</AssemblyName>
@@ -32,6 +32,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FlickrNet">
@@ -62,23 +65,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModel\ConfigureViewModel.cs" />
     <Compile Include="Views\AlbumRenameView.xaml.cs">
       <DependentUpon>AlbumRenameView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\AlbumRenameViewModel.cs" />
     <Compile Include="ViewModel\DuplicateImagesViewModel.cs" />
-    <Compile Include="Views\DuplicateImageView.xaml.cs">
-      <DependentUpon>DuplicateImageView.xaml</DependentUpon>
+    <Compile Include="Views\ConfigureView.xaml.cs">
+      <DependentUpon>ConfigureView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DuplicatesCommand.cs" />
+    <Compile Include="Views\DuplicateImageMoverView.xaml.cs">
+      <DependentUpon>DuplicateImageMoverView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GenericCommand.cs" />
     <Compile Include="StaticCommands.cs" />
-    <Compile Include="ViewModel\ViewModel.cs" />
+    <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Page Include="Views\AlbumRenameView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DuplicateImageView.xaml">
+    <Page Include="Views\ConfigureView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DuplicateImageMoverView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

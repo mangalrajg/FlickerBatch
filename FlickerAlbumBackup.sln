@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		FlickrNet.dll = FlickrNet.dll
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlickerBatch-AlbumRetriever", "FlickerBatch-AlbumRetriever\FlickerBatch-AlbumRetriever.csproj", "{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlickerBatchProcess", "FlickerBatch-AlbumRetriever\FlickerBatchProcess.csproj", "{25C5EB9D-593B-4B14-9FB5-290F8E24D0AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flickr-UI", "Flickr-UI\Flickr-UI.csproj", "{84607AD9-14CB-404D-AB72-5DDF36C9335A}"
 EndProject

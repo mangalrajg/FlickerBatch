@@ -11,7 +11,7 @@ namespace Flickr_UI
     {
         private static readonly RoutedUICommand doSomethingCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
 
-        public static RoutedUICommand DoSomethingCommand
+        public static RoutedUICommand MoveImagesCommand
         {
             get
             {

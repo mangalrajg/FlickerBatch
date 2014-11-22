@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Flickr_UI
+namespace Flickr_UI.Views
 {
     /// <summary>
-    /// Interaction logic for DuplicateImageView.xaml
+    /// Interaction logic for DuplicateImageMover.xaml
     /// </summary>
-    public partial class DuplicateImageView : DataGrid
+    public partial class DuplicateImageMoverView : UserControl
     {
-        public DuplicateImageView()
+        public DuplicateImageMoverView()
         {
             InitializeComponent();
         }

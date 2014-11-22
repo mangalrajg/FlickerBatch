@@ -16,19 +16,6 @@ namespace Flickr_UI
     {
         public App()
         {
-            CommandBinding binding = new CommandBinding(StaticCommands.DoSomethingCommand, DoSomething, CanDoSomething);
-
-            // Register CommandBinding for all windows.
-            CommandManager.RegisterClassCommandBinding(typeof(Window), binding);
-        }
-
-        private void DoSomething(object sender, ExecutedRoutedEventArgs e)
-        {
-        }
-
-        private void CanDoSomething(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
         }
     }
 }

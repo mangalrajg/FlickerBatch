@@ -6,13 +6,13 @@ using System.Windows.Input;
 
 namespace Flickr_UI
 {
-    public class DuplicatesCommand : ICommand
+    public class GenericCommand : ICommand
     {
-        public DuplicatesCommand(Action<object> execute)
+        public GenericCommand(Action<object> execute)
             : this(execute, null)
         {
         }
-        public DuplicatesCommand(Action<object> execute, Predicate<object> canExecute)
+        public GenericCommand(Action<object> execute, Predicate<object> canExecute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
