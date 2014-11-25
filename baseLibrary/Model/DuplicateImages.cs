@@ -30,8 +30,10 @@ namespace Flickr_UI
                         bi.DecodePixelWidth = 200;
                         bi.EndInit();
                     }
-                    catch(Exception ex)
-                    { }
+                    catch(Exception )
+                    {
+                        Console.WriteLine("Not able to load: " + SourcePath + "\\" + FileName);
+                    }
                     _SrcImageData = bi;
 
                 }

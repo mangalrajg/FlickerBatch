@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\output\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -70,12 +70,12 @@
       <DependentUpon>AlbumRenameView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModel\AlbumRenameViewModel.cs" />
-    <Compile Include="ViewModel\DuplicateImagesViewModel.cs" />
+    <Compile Include="ViewModel\DuplicateLocalImageMoverViewModel.cs" />
     <Compile Include="Views\ConfigureView.xaml.cs">
       <DependentUpon>ConfigureView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DuplicateImageMoverView.xaml.cs">
-      <DependentUpon>DuplicateImageMoverView.xaml</DependentUpon>
+    <Compile Include="Views\DuplicateLocalImageMoverView.xaml.cs">
+      <DependentUpon>DuplicateLocalImageMoverView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GenericCommand.cs" />
     <Compile Include="StaticCommands.cs" />
@@ -89,7 +89,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DuplicateImageMoverView.xaml">
+    <Page Include="Views\DuplicateLocalImageMoverView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -131,7 +131,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\load.png" />

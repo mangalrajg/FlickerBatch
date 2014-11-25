@@ -5,23 +5,30 @@
         Title="MainWindow" WindowState="Maximized">
     <DockPanel>
         <Ribbon Title="Ribbon" DockPanel.Dock="Top">
-            <RibbonTab Header="Local">
-                <RibbonGroup Header="Initiallize" >
-                    <RibbonButton  Label="Configure" LargeImageSource="images/config.png"  Command="{Binding ConfigureCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
-                    <RibbonButton  Label="Load" LargeImageSource="images/load.png"   />
+            <Ribbon.ApplicationMenu>
+            <RibbonApplicationMenu>
+                <RibbonApplicationMenuItem Header="Configure" ImageSource="images/config.png"  Command="{Binding ConfigureCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+            </RibbonApplicationMenu>
+            </Ribbon.ApplicationMenu>
+            <RibbonTab Header="Image Manager">
+                <RibbonGroup>
+                <RibbonButton Label="Build Local Images Database" LargeImageSource="images/flickr.png"/>
+                <RibbonButton Label="Find Images to copy" LargeImageSource="images/flickr.png" />
+                <RibbonButton Label="Sync With Backup folder" LargeImageSource="images/flickr.png"/>
+                <RibbonButton Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateLocalImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                 </RibbonGroup>
-                <RibbonGroup Header="Actions" >
-                    <RibbonButton  LargeImageSource="images/duplicates.png" Label="Find Duplicates" Command="{Binding DuplicatesCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
-                </RibbonGroup>
-
             </RibbonTab>
 
             <RibbonTab Header="Flicker">
-                <RibbonGroup Header="Connect" >
-                    <RibbonButton  LargeImageSource="images/flickr.png"  Label="Connect"/>
-                    <RibbonButton  LargeImageSource="images/upload.png" Label="Upload" Command="{Binding UploadCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
-                    <RibbonButton  LargeImageSource="images/upload.png" Label="Album Rename" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+                <RibbonGroup>
+                <RibbonButton  Label="Test Connection" LargeImageSource="images/flickr.png"/>
+                <RibbonButton  Label="Build Remote Image Database" LargeImageSource="images/load.png" />
+                <RibbonButton  Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateLocalImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
 
+                <RibbonButton  Label="Find Images to Upload" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+                <RibbonButton  Label="Find Images to Rename" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+
+                <RibbonButton  Label="Download" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>

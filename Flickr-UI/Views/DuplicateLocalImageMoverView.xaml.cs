@@ -18,9 +18,9 @@ namespace Flickr_UI.Views
     /// <summary>
     /// Interaction logic for DuplicateImageMover.xaml
     /// </summary>
-    public partial class DuplicateImageMoverView : UserControl
+    public partial class DuplicateLocalImageMoverView : UserControl
     {
-        public DuplicateImageMoverView()
+        public DuplicateLocalImageMoverView()
         {
             InitializeComponent();
         }

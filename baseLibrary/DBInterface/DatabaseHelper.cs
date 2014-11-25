@@ -17,7 +17,7 @@ namespace baseLibrary.DBInterface
         private static Object concurrencyObj = new object();
         private static String dbProvider = "System.Data.SQLite";
         private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
-        private static String _loadDuplicatesSQL = @"select  path src,path2 dest, count(1) numPics from 
+        private static String _loadLocalDuplicatesSQL = @"select  path src,path2 dest, count(1) numPics from 
                                                         (select l1.filename, l1.date_taken, l1.path path, l2.path path2, l1.size from local_data l1, local_data l2 where
                                                         l1.filename = l2.filename and
                                                         l1.date_taken = l2.date_taken and
@@ -25,7 +25,7 @@ namespace baseLibrary.DBInterface
                                                         l1.path != l2.path
                                                         order by l1.filename desc)
                                                     group by path,path2;";
-        private static String _loadDuplicateImagesSQL = @"select l1.filename, l1.date_taken, l1.path path, l2.path path2, l1.size from local_data l1, local_data l2 where
+        private static String _loadLocalDuplicateImagesSQL = @"select l1.filename, l1.date_taken, l1.path path, l2.path path2, l1.size from local_data l1, local_data l2 where
                                                         l1.filename = l2.filename and
                                                         l1.date_taken = l2.date_taken and
                                                         l1.size = l2.size and 
@@ -34,32 +34,6 @@ namespace baseLibrary.DBInterface
                                                         l2.path = '{1}'
                                                         order by l1.filename desc;";
 
-        static DatabaseHelper()
-        {
-            DataTable table = DbProviderFactories.GetFactoryClasses();
-
-            //// Display each row and column value. 
-            //foreach (DataRow row in table.Rows)
-            //{
-            //    foreach (DataColumn column in table.Columns)
-            //    {
-            //        Console.WriteLine(column.ToString() + "=" + row[column]);
-            //    }
-            //    Console.WriteLine("=====================");
-            //}
-            //try
-            //{
-            //    var dataSet = ConfigurationManager.GetSection("system.data") as System.Data.DataSet;
-            //    dataSet.Tables[0].Rows.Add("SQLite Data Provider"
-            //    , ".Net Framework Data Provider for SQLite"
-            //    , "System.Data.SQLite"
-            //    , "System.Data.SQLite.SQLiteFactory, System.Data.SQLite");
-            //}
-            //catch (System.Data.ConstraintException)
-            //{
-            //}
-
-        }
         public static void InitiallizeDataStructure()
         {
             
@@ -75,12 +49,11 @@ namespace baseLibrary.DBInterface
             ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.FLICKR_ALBUMS +
                 "(ID TEXT, NAME TEXT, DATE_CREATED TEXT,NUM_PICS INTEGER, DESCRIPTION TEXT, SYNC_DATE TEXT);");
 
-            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.JOIN +
+            ExecuteNonQuery("CREATE TABLE if not exists " + TableNames.JOIN_DATA +
                 "(NAME TEXT, DATE_TAKEN TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT, COUNT INTEGER);");
 
             return;
         }
-
 
         public static void ExecuteNonQuery(String sql)
         {
@@ -204,18 +177,6 @@ namespace baseLibrary.DBInterface
             return retList;
         }
 
-
-        //public static bool IsRemoteImageInDB(String photoId)
-        //{
-        //    bool isImageInDb = false;
-        //    lock (concurrencyObj)
-        //    {
-        //        isImageInDb = ExecuteCheckSQL(String.Format(RemoteImageData.CheckSQL, photoId));
-        //    }
-        //    return isImageInDb;
-        //}
-
-
         public static bool ExecuteCheckSQL(string sql)
         {
             Boolean ret = false;
@@ -303,58 +264,52 @@ namespace baseLibrary.DBInterface
             String getLocalDataSQL = "select * from " + TableNames.LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
             String UpdateRemoteDataSQL = "UPDATE " + TableNames.REMOTE_DATA + " SET PROCESSED='Y' where TITLE = '{0}' and DATE_TAKEN='{1}';";
             String UpdateLocalDataSQL = "UPDATE " + TableNames.LOCAL_DATA + "  SET PROCESSED='Y' where FILENAME = '{0}' and DATE_TAKEN='{1}';";
-            String InsertSQL = "Insert into " + TableNames.JOIN + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
+            String InsertSQL = "Insert into " + TableNames.JOIN_DATA + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
 
-            //String checkRemoteSQL = "select count(*) COUNT from " + LOCAL_DATA + " where FILENAME = '{0}' and DATE_TAKEN='{1}';";
-            //String getLocalPathSQL = "select PATH from " + LOCAL_DATA + " where FILENAME = '{0}' and DATE_TAKEN='{1}';";
             using (DbConnection cnn = fact.CreateConnection())
             {
                 cnn.ConnectionString = connectionString;
                 cnn.Open();
-
                 DbCommand cmd = cnn.CreateCommand();
                 var transaction = cnn.BeginTransaction();
+                cmd.CommandText = "select * from " + TableNames.REMOTE_DATA + " WHERE PROCESSED='N';";
+                int imageCount = 0;
+                DbDataReader remoteDataReader = cmd.ExecuteReader();
+                while (remoteDataReader.Read())
                 {
-
-                    cmd.CommandText = "select * from " + TableNames.REMOTE_DATA + " WHERE PROCESSED='N';";
-                    int imageCount = 0;
-                    DbDataReader remoteDataReader = cmd.ExecuteReader();
-                    while (remoteDataReader.Read())
+                    imageCount++;
+                    String title = (String)remoteDataReader["TITLE"];
+                    String dateTaken = (String)remoteDataReader["DATE_TAKEN"];
+                    String flickerPath = (String)remoteDataReader["ALBUM"];
+                    String localPath = "";
+                    DbCommand cmd2 = cnn.CreateCommand();
+                    cmd2.CommandText = String.Format(getLocalDataSQL, title, dateTaken);
+                    DbDataReader localDataReader = cmd2.ExecuteReader();
+                    int count = 0;
+                    while (localDataReader.Read())
                     {
-                        imageCount++;
-                        String title = (String)remoteDataReader["TITLE"];
-                        String dateTaken = (String)remoteDataReader["DATE_TAKEN"];
-                        String flickerPath = (String)remoteDataReader["ALBUM"];
-                        String localPath = "";
-                        DbCommand cmd2 = cnn.CreateCommand();
-                        cmd2.CommandText = String.Format(getLocalDataSQL, title, dateTaken);
-                        DbDataReader localDataReader = cmd2.ExecuteReader();
-                        int count = 0;
-                        while (localDataReader.Read())
-                        {
-                            count++;
-                            localPath = (String)localDataReader["PATH"];
-                        }
-
-                        DbCommand cmd3 = cnn.CreateCommand();
-                        cmd3.CommandText = String.Format(UpdateRemoteDataSQL, GenericHelper.StringSQLite(title), dateTaken);
-                        cmd3.ExecuteNonQuery();
-                        cmd3.CommandText = String.Format(UpdateLocalDataSQL, GenericHelper.StringSQLite(title), dateTaken);
-                        cmd3.ExecuteNonQuery();
-                        cmd3.CommandText = String.Format(InsertSQL, title.Replace("'", "''"), dateTaken, GenericHelper.StringSQLite(flickerPath), GenericHelper.StringSQLite(localPath), count);
-                        cmd3.ExecuteNonQuery();
-                        Console.WriteLine(imageCount + ". Title: " + title + "\t Count=" + count);
-                        if (imageCount % 100 == 0)
-                        {
-                            Console.WriteLine("Saving....");
-                            transaction.Commit();
-                            transaction = cnn.BeginTransaction();
-                        }
+                        count++;
+                        localPath = (String)localDataReader["PATH"];
                     }
-                    transaction.Commit();
-                    Console.WriteLine("Done....");
 
+                    DbCommand cmd3 = cnn.CreateCommand();
+                    cmd3.CommandText = String.Format(UpdateRemoteDataSQL, GenericHelper.StringSQLite(title), dateTaken);
+                    cmd3.ExecuteNonQuery();
+                    cmd3.CommandText = String.Format(UpdateLocalDataSQL, GenericHelper.StringSQLite(title), dateTaken);
+                    cmd3.ExecuteNonQuery();
+                    cmd3.CommandText = String.Format(InsertSQL, title.Replace("'", "''"), dateTaken, GenericHelper.StringSQLite(flickerPath), GenericHelper.StringSQLite(localPath), count);
+                    cmd3.ExecuteNonQuery();
+                    Console.WriteLine(imageCount + ". Title: " + title + "\t Count=" + count);
+                    if (imageCount % 100 == 0)
+                    {
+                        Console.WriteLine("Saving....");
+                        transaction.Commit();
+                        transaction = cnn.BeginTransaction();
+                    }
                 }
+                transaction.Commit();
+                Console.WriteLine("Done....");
+
                 cnn.Close();
             }
 
@@ -376,7 +331,7 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = _loadDuplicatesSQL;
+                    mycommand.CommandText = _loadLocalDuplicatesSQL;
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
@@ -402,7 +357,7 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = String.Format(_loadDuplicateImagesSQL, SourcePath, DestinationPath);
+                    mycommand.CommandText = String.Format(_loadLocalDuplicateImagesSQL, SourcePath, DestinationPath);
 
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())

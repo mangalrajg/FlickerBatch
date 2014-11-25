@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace Flickr_UI
 {
-    class DuplicateImagesViewModel : ViewModelBase
+    class DuplicateLocalImageMoverViewModel : ViewModelBase
     {
         private DuplicateImageData _SelectedItem;
         public DuplicateImageData SelectedItem
@@ -41,14 +41,14 @@ namespace Flickr_UI
             }
         }
 
-        public DuplicateImagesViewModel()
+        public DuplicateLocalImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageData>();
             DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
             CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesCommand, MoveImages, MoveImagesSomething);
-            CommandManager.RegisterClassCommandBinding(typeof(DuplicateImageMoverView), binding);
+            CommandManager.RegisterClassCommandBinding(typeof(DuplicateLocalImageMoverView), binding);
 
 
         }

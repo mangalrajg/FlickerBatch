@@ -13,25 +13,25 @@ namespace Flickr_UI.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        #region DuplicatesCommand
-        private ICommand _DuplicatesCommand;
-        public ICommand DuplicatesCommand
+        #region DuplicateLocalImageMoverCommand
+        private ICommand _DuplicateLocalImageMoverCommand;
+        public ICommand DuplicateLocalImageMoverCommand
         {
             get
             {
-                if (_DuplicatesCommand == null)
+                if (_DuplicateLocalImageMoverCommand == null)
                 {
-                    _DuplicatesCommand = new GenericCommand(param => this.SetDuplicateImageViewModel(param), null);
+                    _DuplicateLocalImageMoverCommand = new GenericCommand(param => this.SetDuplicateLocalImageMoverViewModel(param), null);
                 }
-                return _DuplicatesCommand;
+                return _DuplicateLocalImageMoverCommand;
             }
         }
 
-        private object SetDuplicateImageViewModel(Object param)
+        private object SetDuplicateLocalImageMoverViewModel(Object param)
         {
             (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new DuplicateImageMoverView());
-            (param as Grid).DataContext = new DuplicateImagesViewModel();
+            (param as Grid).Children.Add(new DuplicateLocalImageMoverView());
+            (param as Grid).DataContext = new DuplicateLocalImageMoverViewModel();
             return null;
         }
         #endregion
@@ -60,26 +60,26 @@ namespace Flickr_UI.ViewModel
         #endregion
 
         #region UploadCommand
-        private ICommand _UploadCommand;
-        public ICommand UploadCommand
-        {
-            get
-            {
-                if (_UploadCommand == null)
-                {
-                    _UploadCommand = new GenericCommand(param => this.SetUploadViewModel(param), null);
-                }
-                return _UploadCommand;
-            }
-        }
+        //private ICommand _UploadCommand;
+        //public ICommand UploadCommand
+        //{
+        //    get
+        //    {
+        //        if (_UploadCommand == null)
+        //        {
+        //            _UploadCommand = new GenericCommand(param => this.SetUploadViewModel(param), null);
+        //        }
+        //        return _UploadCommand;
+        //    }
+        //}
 
-        private object SetUploadViewModel(object param)
-        {
-            (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new AlbumRenameView());
-            (param as Grid).DataContext = new AlbumRenameViewModel();
-            return null;
-        }
+        //private object SetUploadViewModel(object param)
+        //{
+        //    (param as Grid).Children.Clear();
+        //    (param as Grid).Children.Add(new AlbumRenameView());
+        //    (param as Grid).DataContext = new AlbumRenameViewModel();
+        //    return null;
+        //}
         #endregion
 
         #region ConfigureCommand

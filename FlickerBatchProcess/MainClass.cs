@@ -16,14 +16,16 @@ namespace FlickerBatch_AlbumRetriever
 {
     class MainClass
     {
-        static bool saveFlickrData = false;
-        static bool saveLocalData = true;
-        static bool join = false;
+        static String saveFlickrData = "FALSE";
+        static String saveLocalData = "FALSE";
+        static String join = "FALSE";
         static void Main(string[] args)
         {
 
             DatabaseHelper.InitiallizeDataStructure();
-            if (saveFlickrData)
+            Dictionary<string, string> config = DatabaseHelper.loadMasterConfigData("BATCH_CONFIG");
+
+            if(config.TryGetValue("SaveFlickerData", out saveFlickrData) && saveFlickrData == "TRUE" )
             {
 
                 Dictionary<string, string> auth_data = DatabaseHelper.loadMasterConfigData("AUTH");
@@ -31,9 +33,7 @@ namespace FlickerBatch_AlbumRetriever
                 FlickerHelper.Flickr_Auth(auth_data);
                 Console.WriteLine("Saving Auth Info..");
                 DatabaseHelper.saveConfigData("AUTH", auth_data);
-            }
-            if (saveFlickrData)
-            {
+
                 Console.WriteLine("Download Photo Info from Flicker");
                 List<FlickrAlbumData> psList = FlickerHelper.getAllAlbums();
                 foreach (FlickrAlbumData ps in psList)
@@ -44,14 +44,14 @@ namespace FlickerBatch_AlbumRetriever
 
 
             }
-            if (saveLocalData)
+            if (config.TryGetValue("SaveLocalData", out saveLocalData) && saveLocalData == "TRUE")
             {
                 Dictionary<string, string> local_data = DatabaseHelper.loadMasterConfigData("LOCAL");
                 FilesystemHelper.getFileList(local_data["LocalBasePath"]);
                 DatabaseHelper.removePrefix(local_data["LocalBasePath"]);
             }
 
-            if(join)
+            if (config.TryGetValue("Join", out join) && join == "TRUE")
             {
                 DatabaseHelper.Join();
             }
