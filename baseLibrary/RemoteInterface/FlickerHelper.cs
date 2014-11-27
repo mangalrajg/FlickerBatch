@@ -18,7 +18,7 @@ namespace baseLibrary.RemoteInterface
 
         static FlickerHelper()
         {
-            Dictionary<string, string> auth_data = DatabaseHelper.LoadMasterConfigData("AUTH");
+            Dictionary<string, string> auth_data = ConfigModel.AuthData;
             flickr = new Flickr(ApiKey, SharedSecret);
             String accessTokenStr = "";
             OAuthAccessToken accessToken = null;
@@ -48,25 +48,20 @@ namespace baseLibrary.RemoteInterface
             flickr.OAuthAccessTokenSecret = accessToken.TokenSecret;
         }
 
-        public static List<FlickrAlbumData> getAllAlbums()
+        public static List<FlickrAlbumData> LoadAllAlbums()
         {
-            List<FlickrAlbumData> retPs = DatabaseHelper.LoadFlickerAlbums();
-            if (retPs.Count == 0)
+            List<FlickrAlbumData> retPs = new List<FlickrAlbumData>();
+            Console.WriteLine("Loading Albums from Flicker..... ");
+            PhotosetCollection psc = flickr.PhotosetsGetList();
+            foreach (Photoset ps in psc)
             {
-                Console.WriteLine("Loading Albums from Flicker..... ");
-                PhotosetCollection psc = flickr.PhotosetsGetList();
-                foreach (Photoset ps in psc)
-                {
-                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
-                    retPs.Add(fad);
-                }
-                Console.WriteLine("Saving Albums in local DB ..... ");
-                DatabaseHelper.SaveFlickerAlbums(retPs);
+                FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                retPs.Add(fad);
             }
             return retPs;
         }
 
-        public static void DownloadPicturesMetaData(FlickrAlbumData ps)
+        public static void SaveRemotePicturesData(FlickrAlbumData ps)
         {
             int numPage = 0;
             while (ps.NumberOfPhotos > numPage * 500)
@@ -121,6 +116,31 @@ namespace baseLibrary.RemoteInterface
             return;
         }
 
+        public static List<BaseImageData> LoadRemotePicturesData(FlickrAlbumData ps)
+        {
+            int numPage = 0;
+            List<BaseImageData> allPics = new List<BaseImageData>();
+            try
+            {
+                while (ps.NumberOfPhotos > numPage * 500)
+                {
+                    numPage++;
+                    Console.WriteLine("Loading Album Info: " + ps.Name);
+                    PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
+                    foreach (Photo p in ppc)
+                    {
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
+                        allPics.Add(rid);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return allPics;
+        }
+
         public static void RenameImage(List<RemoteImageData> ridList, String newAlbumName)
         {
             String tmpAlbumName = "";
@@ -149,5 +169,19 @@ namespace baseLibrary.RemoteInterface
         }
 
 
+        public static void MovePicture(string photoID, string oldAblumId, string newAlbumId)
+        {
+            flickr.PhotosetsRemovePhoto(oldAblumId, photoID);
+            flickr.PhotosetsAddPhoto(newAlbumId, photoID);
+        }
+
+        public static FlickrAlbumData CreateAlbumAndMovePicture(string photoID, string oldAblumId, string newAlbumName)
+        {
+            flickr.PhotosetsRemovePhoto(oldAblumId, photoID);
+            Photoset ps = flickr.PhotosetsCreate(newAlbumName, photoID);
+
+            return new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+
+        }
     }
 }

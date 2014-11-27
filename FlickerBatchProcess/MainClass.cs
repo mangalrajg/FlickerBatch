@@ -22,10 +22,10 @@ namespace FlickerBatch_AlbumRetriever
             {
 
                 Console.WriteLine("Download Photo Info from Flicker");
-                List<FlickrAlbumData> psList = FlickerHelper.getAllAlbums();
+                List<FlickrAlbumData> psList = FlickerHelper.LoadAllAlbums();
                 foreach (FlickrAlbumData ps in psList)
                 {
-                    FlickerHelper.DownloadPicturesMetaData(ps);                    
+                    FlickerHelper.SaveRemotePicturesData(ps);                    
                 }
                 FlickerHelper.WaitForAllThreads();
 

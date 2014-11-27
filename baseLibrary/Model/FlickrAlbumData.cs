@@ -9,9 +9,32 @@ namespace baseLibrary.Model
 {
     public class FlickrAlbumData
     {
-        public static String InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}')";
+        private static String _InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}')";
         public static String CheckSQL = "";
-        
+        public String InsertSQL
+        {
+            get
+            {
+                return String.Format(_InsertSQL, AlbumId, GenericHelper.StringSQLite(Name), GenericHelper.DateTimeSQLite(DateCreated), NumberOfPhotos,
+                GenericHelper.StringSQLite(Description), GenericHelper.DateTimeSQLite(SyncDate));
+            }
+        }
+        public static String DeleteAllSQL
+        {
+            get
+            {
+                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + ";");
+            }
+        }
+
+        public String DeleteSQL
+        {
+            get
+            {
+                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + " WHERE ID='{0}';",AlbumId);
+            }
+        }
+
 
         public String AlbumId { get; set; }
         public String Name { get; set; }
@@ -29,20 +52,6 @@ namespace baseLibrary.Model
             this.Description = desc;
             this.SyncDate = syncDate;
         }
-
-        public String getInsertStatement()
-        {
-            return String.Format(InsertSQL, AlbumId, GenericHelper.StringSQLite(Name), GenericHelper.DateTimeSQLite(DateCreated), NumberOfPhotos,
-                GenericHelper.StringSQLite(Description), GenericHelper.DateTimeSQLite(SyncDate));
-        }
-
-        //public override string getCheckStatement()
-        //{
-        //    return String.Format(CheckSQL, AlbumId);
-        //}
-
-
-
 
     }
 }

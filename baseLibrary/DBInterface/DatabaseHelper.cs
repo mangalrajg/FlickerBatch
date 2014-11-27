@@ -16,7 +16,7 @@ namespace baseLibrary.DBInterface
     {
         private static Object concurrencyObj = new object();
         private static String dbProvider = "System.Data.SQLite";
-//        private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
+        //        private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
         private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
         #region Static SQLs
@@ -352,15 +352,18 @@ namespace baseLibrary.DBInterface
                     DbCommand cmd = cnn.CreateCommand();
                     foreach (FlickrAlbumData fad in fadList)
                     {
-                        cmd.CommandText = fad.getInsertStatement();
+                        cmd.CommandText = fad.InsertSQL;
                         cmd.ExecuteNonQuery();
 
                     }
                     transaction.Commit();
                 }
-
                 cnn.Close();
             }
+        }
+        public static void SaveFlickerAlbum(FlickrAlbumData fad)
+        {
+            ExecuteNonQuery(fad.InsertSQL);
         }
         public static void SaveJoinData()
         {
@@ -447,17 +450,43 @@ namespace baseLibrary.DBInterface
                 cnn.Close();
             }
             return ret;
-            
+
         }
 
         public static void DeleteLocalImageData(string baseDir)
         {
-            ExecuteNonQuery(String.Format("DELETE from LOCAL_DATA where PATH='{0}';",GenericHelper.StringSQLite(baseDir)));
+            ExecuteNonQuery(String.Format("DELETE from LOCAL_DATA where PATH='{0}';", GenericHelper.StringSQLite(baseDir)));
         }
 
         public static void DeleteRemoteImageData(string albumName)
         {
             ExecuteNonQuery(String.Format("DELETE from REMOTE_DATA where ALBUM='{0}';", GenericHelper.StringSQLite(albumName)));
+        }
+
+        internal static void DeleteFlickerAlbums(List<FlickrAlbumData> fadList)
+        {
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    DbCommand cmd = cnn.CreateCommand();
+                    foreach (FlickrAlbumData fad in fadList)
+                    {
+                        cmd.CommandText = fad.DeleteSQL;
+                        cmd.ExecuteNonQuery();
+
+                    }
+                    transaction.Commit();
+                }
+                cnn.Close();
+            }
+        }
+        public static void DeleteAllFlickerAlbums()
+        {
+            ExecuteNonQuery(FlickrAlbumData.DeleteAllSQL);
         }
     }
 

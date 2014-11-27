@@ -1,4 +1,6 @@
 ﻿using baseLibrary.DBInterface;
+using baseLibrary.Model;
+using baseLibrary.RemoteInterface;
 using Flickr_UI.Views;
 using System;
 using System.Collections.Generic;
@@ -43,7 +45,7 @@ namespace Flickr_UI
         public DuplicateRemoteImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
-           // DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
+            // DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
             CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesRemoteCommand, MoveImages, MoveImagesSomething);
@@ -54,11 +56,26 @@ namespace Flickr_UI
 
         private void MoveImages(object sender, ExecutedRoutedEventArgs e)
         {
-            foreach(DuplicateImageData di in SelectedItem.ImageDetails)
+            foreach (DuplicateImageData di in SelectedItem.ImageDetails)
             {
                 Console.WriteLine("Move " + di.SourcePath + " to " + di.DestinationPath);
-                di.IsProcessed = true;
+                if (FlickerCache.AlbumSearchDict.ContainsKey(di.SourcePath))
+                {
+                    RemoteImageData rid =  FlickerCache.getImageData(di.FileName, di.DestinationPath);
+                    if (rid != null)
+                    {
+                        String tmpFolder = ConfigModel.RemoteData["RemoteTempAlbum"] + "\\" + di.SourcePath;
+                        FlickerCache.MovePicture(di.FileName, di.DestinationPath, tmpFolder);
+                    }
+                    FlickerCache.MovePicture(di.FileName, di.SourcePath, di.DestinationPath);
+                    di.IsProcessed = true;
+                }
+
             }
+            FlickerCache.SaveRemoteAlbum(SelectedItem.SourcePath);
+            FlickerCache.SaveRemoteAlbum(SelectedItem.DestinationPath);
+            this.LoadDuplicateImages();
+
         }
 
         private void MoveImagesSomething(object sender, CanExecuteRoutedEventArgs e)
