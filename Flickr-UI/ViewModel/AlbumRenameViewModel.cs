@@ -1,5 +1,5 @@
 ﻿using baseLibrary.DBInterface;
-using FlickerBatch_AlbumRetriever.Model;
+using baseLibrary.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

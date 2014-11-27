@@ -1,5 +1,5 @@
 ﻿using baseLibrary.DBInterface;
-using FlickerBatch_AlbumRetriever.Model;
+using baseLibrary.Model;
 using FlickrSync;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlickerBatch_AlbumRetriever
+namespace baseLibrary.LocalInterface
 {
     public static class FilesystemHelper
     {
@@ -43,7 +43,7 @@ namespace FlickerBatch_AlbumRetriever
                 }
             }
             Console.WriteLine("Count= " + lidList.Count + "\t Processed Dir: " + baseDir );
-            if (lidList.Count > 100)
+            if (lidList.Count > 1000)
             {
                 Console.WriteLine("Loaded PicsCount = " + lidList.Count + " Saving Data..");
                 DatabaseHelper.SaveImageData(lidList);

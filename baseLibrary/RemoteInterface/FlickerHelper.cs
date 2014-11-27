@@ -1,5 +1,5 @@
 ﻿using baseLibrary.DBInterface;
-using FlickerBatch_AlbumRetriever.Model;
+using baseLibrary.Model;
 using FlickrNet;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace FlickerBatch_AlbumRetriever
+namespace baseLibrary.RemoteInterface
 {
     public static class FlickerHelper
     {
@@ -90,7 +90,7 @@ namespace FlickerBatch_AlbumRetriever
                             allPics.Add(rid);
                         }
 
-                        retList = DatabaseHelper.getPhotosToSave(allPics);
+                        retList = DatabaseHelper.GetPhotosToSave(allPics);
                         if (retList.Count > 0)
                         {
                             DatabaseHelper.SaveImageData(retList);
@@ -126,7 +126,7 @@ namespace FlickerBatch_AlbumRetriever
 
 
 
-        internal static void WaitForAllThreads()
+        public static void WaitForAllThreads()
         {
             if (threadFinishEvents.Count > 0)
             {

@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlickerBatch_AlbumRetriever.Model
+namespace baseLibrary.Model
 {
     public abstract class BaseImageData
     {
-        public String Name {get; set;}
+        public abstract String InsertSQL { get; }
+        public abstract String CheckSQL { get; }
+        public String Name { get; set; }
         public DateTime DateTaken { get; set; }
         public String Description { get; set; }
 
@@ -18,8 +20,6 @@ namespace FlickerBatch_AlbumRetriever.Model
             this.DateTaken = dateTaken;
             this.Description = desc;
         }
-        public abstract String getInsertStatement();
-        public abstract String getCheckStatement();
 
     }
 }

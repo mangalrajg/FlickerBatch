@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace Flickr_UI
 {
-    class DuplicateLocalImageMoverViewModel : ViewModelBase
+    class DuplicateRemoteImageMoverViewModel : ViewModelBase
     {
         private DuplicateImageGroupData _SelectedItem;
         public DuplicateImageGroupData SelectedItem
@@ -40,24 +40,24 @@ namespace Flickr_UI
             }
         }
 
-        public DuplicateLocalImageMoverViewModel()
+        public DuplicateRemoteImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
            // DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
-            CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesCommand, MoveImages, MoveImagesSomething);
-            CommandManager.RegisterClassCommandBinding(typeof(DuplicateLocalImageMoverView), binding);
+            CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesRemoteCommand, MoveImages, MoveImagesSomething);
+            CommandManager.RegisterClassCommandBinding(typeof(DuplicateRemoteImageMoverView), binding);
 
 
         }
 
         private void MoveImages(object sender, ExecutedRoutedEventArgs e)
         {
-//            DuplicateImageGroupData id= (sender as DuplicateImageMoverView)
             foreach(DuplicateImageData di in SelectedItem.ImageDetails)
             {
                 Console.WriteLine("Move " + di.SourcePath + " to " + di.DestinationPath);
+                di.IsProcessed = true;
             }
         }
 
@@ -72,7 +72,7 @@ namespace Flickr_UI
         //}
         private void LoadDuplicateImages()
         {
-            List<DuplicateImageGroupData> imgData = DatabaseHelper.LoadLocalDuplicateImageData();
+            List<DuplicateImageGroupData> imgData = DatabaseHelper.LoadRemoteDuplicateImageData();
             foreach (DuplicateImageGroupData did in imgData)
             {
                 DuplicateImageCollection.Add(did);

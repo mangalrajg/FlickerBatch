@@ -36,6 +36,30 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
+        #region DuplicateRemoteImageMoverCommand
+        private ICommand _DuplicateRemoteImageMoverCommand;
+        public ICommand DuplicateRemoteImageMoverCommand
+        {
+            get
+            {
+                if (_DuplicateRemoteImageMoverCommand == null)
+                {
+                    _DuplicateRemoteImageMoverCommand = new GenericCommand(param => this.SetDuplicateRemoteImageMoverViewModel(param), null);
+                }
+                return _DuplicateRemoteImageMoverCommand;
+            }
+        }
+
+        private object SetDuplicateRemoteImageMoverViewModel(Object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new DuplicateRemoteImageMoverView());
+            (param as Grid).DataContext = new DuplicateRemoteImageMoverViewModel();
+            return null;
+        }
+        #endregion
+
+
         #region AlbumRenameCommand
         private ICommand _AlbumRenameCommand;
         public ICommand AlbumRenameCommand

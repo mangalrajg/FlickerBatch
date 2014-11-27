@@ -23,7 +23,7 @@
                 <RibbonGroup>
                 <RibbonButton  Label="Test Connection" LargeImageSource="images/flickr.png"/>
                 <RibbonButton  Label="Build Remote Image Database" LargeImageSource="images/load.png" />
-                <RibbonButton  Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateLocalImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+                <RibbonButton  Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateRemoteImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
 
                 <RibbonButton  Label="Find Images to Upload" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                 <RibbonButton  Label="Find Images to Rename" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>

@@ -9,14 +9,24 @@ namespace Flickr_UI
 {
     public static class StaticCommands
     {
-        private static readonly RoutedUICommand doSomethingCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        private static readonly RoutedUICommand _MoveImagesCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
 
         public static RoutedUICommand MoveImagesCommand
         {
             get
             {
-                return doSomethingCommand;
+                return _MoveImagesCommand;
             }
         }
+        private static readonly RoutedUICommand _MoveImagesRemoteCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+
+        public static RoutedUICommand MoveImagesRemoteCommand
+        {
+            get
+            {
+                return _MoveImagesRemoteCommand;
+            }
+        }
+
     }
 }
