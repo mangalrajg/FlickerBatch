@@ -21,17 +21,11 @@ namespace FlickerBatch_AlbumRetriever
             if(config.TryGetValue("SaveFlickerData", out saveFlickrData) && saveFlickrData == "TRUE" )
             {
 
-                Dictionary<string, string> auth_data = DatabaseHelper.LoadMasterConfigData("AUTH");
-                Console.WriteLine("Authenticating With Flicker");
-                FlickerHelper.Flickr_Auth(auth_data);
-                Console.WriteLine("Saving Auth Info..");
-                DatabaseHelper.SaveConfigData("AUTH", auth_data);
-
                 Console.WriteLine("Download Photo Info from Flicker");
                 List<FlickrAlbumData> psList = FlickerHelper.getAllAlbums();
                 foreach (FlickrAlbumData ps in psList)
                 {
-                    FlickerHelper.savePictures(ps);                    
+                    FlickerHelper.DownloadPicturesMetaData(ps);                    
                 }
                 FlickerHelper.WaitForAllThreads();
 
@@ -40,7 +34,7 @@ namespace FlickerBatch_AlbumRetriever
             if (config.TryGetValue("SaveLocalData", out saveLocalData) && saveLocalData == "TRUE")
             {
                 Dictionary<string, string> local_data = DatabaseHelper.LoadMasterConfigData("LOCAL");
-                FilesystemHelper.getFileList(local_data["LocalBasePath"]);
+                FilesystemHelper.SaveLocalImageData(local_data["LocalBasePath"]);
                 //DatabaseHelper.RemovePrefix(local_data["LocalBasePath"]);
             }
 

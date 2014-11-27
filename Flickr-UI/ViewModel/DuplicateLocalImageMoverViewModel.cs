@@ -1,8 +1,11 @@
 ﻿using baseLibrary.DBInterface;
+using baseLibrary.LocalInterface;
+using baseLibrary.Model;
 using Flickr_UI.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,7 +46,6 @@ namespace Flickr_UI
         public DuplicateLocalImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
-           // DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
             CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesCommand, MoveImages, MoveImagesSomething);
@@ -54,11 +56,25 @@ namespace Flickr_UI
 
         private void MoveImages(object sender, ExecutedRoutedEventArgs e)
         {
-//            DuplicateImageGroupData id= (sender as DuplicateImageMoverView)
             foreach(DuplicateImageData di in SelectedItem.ImageDetails)
             {
-                Console.WriteLine("Move " + di.SourcePath + " to " + di.DestinationPath);
+
+                Console.WriteLine("Move " + di.SrcFileName + " to " + di.DestFileName);
+                if (File.Exists(di.SrcFileName))
+                {
+                    if (File.Exists(di.DestFileName))
+                    {
+                        String tmpFolder = ConfigModel.LocalData["LocalTempPath"] + "\\" + di.SourcePath;
+                        Directory.CreateDirectory(tmpFolder);
+                        File.Move(di.DestFileName, tmpFolder  +"\\"+ di.FileName);
+                    }
+                    File.Move(di.SrcFileName, di.DestFileName);
+                    di.IsProcessed = true;
+                }
             }
+            FilesystemHelper.SaveLocalImageData(SelectedItem.SourcePath);
+            FilesystemHelper.SaveLocalImageData(SelectedItem.DestinationPath);
+            this.LoadDuplicateImages();
         }
 
         private void MoveImagesSomething(object sender, CanExecuteRoutedEventArgs e)
@@ -66,12 +82,9 @@ namespace Flickr_UI
             e.CanExecute = true;
         }
 
-        //void Students_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    NotifyPropertyChanged("DuplicateImageObjs");
-        //}
         private void LoadDuplicateImages()
         {
+            DuplicateImageCollection.Clear();
             List<DuplicateImageGroupData> imgData = DatabaseHelper.LoadLocalDuplicateImageData();
             foreach (DuplicateImageGroupData did in imgData)
             {

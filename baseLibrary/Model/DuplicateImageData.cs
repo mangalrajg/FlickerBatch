@@ -23,20 +23,20 @@ namespace Flickr_UI
             {
                 if (_SrcImageData == null)
                 {
-                    String fileName = ConfigModel.LocalData["LocalBasePath"] + "\\" + SourcePath + "\\" + FileName;
                     BitmapImage bi= new BitmapImage();
-                    if (File.Exists(fileName))
+                    if (File.Exists(SrcFileName) && SrcFileName.EndsWith(".jpg", System.StringComparison.CurrentCultureIgnoreCase))
                     {
                         try
                         {
                             bi.BeginInit();
-                            bi.UriSource = new Uri(fileName);
+                            bi.UriSource = new Uri(SrcFileName);
+                            bi.CacheOption = BitmapCacheOption.OnLoad;
                             bi.DecodePixelWidth = 200;
                             bi.EndInit();
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine("Not able to load: " + SourcePath + "\\" + FileName);
+                            Console.WriteLine("Not able to load: " + SrcFileName);
                         }
                     }
                     _SrcImageData = bi;
@@ -53,13 +53,13 @@ namespace Flickr_UI
                 if (_DestImageData == null)
                 {
                     BitmapImage bi = new BitmapImage();
-                    String fileName = ConfigModel.LocalData["LocalBasePath"] + "\\" + DestinationPath + "\\" + FileName;
-                    if (File.Exists(fileName))
+                    if (File.Exists(DestFileName) && DestFileName.EndsWith(".jpg", System.StringComparison.CurrentCultureIgnoreCase))
                     {
                         try
                         {
                             bi.BeginInit();
-                            bi.UriSource = new Uri(fileName);
+                            bi.UriSource = new Uri(DestFileName);
+                            bi.CacheOption = BitmapCacheOption.OnLoad;
                             bi.DecodePixelWidth = 200;
                             bi.EndInit();
                         }
@@ -72,6 +72,21 @@ namespace Flickr_UI
 
                 }
                 return _DestImageData;
+            }
+        }
+        public String SrcFileName
+        {
+            get
+            {
+                return ConfigModel.LocalData["LocalBasePath"] + "\\" + SourcePath + "\\" + FileName;
+            }
+        }
+
+        public String DestFileName
+        {
+            get
+            {
+                return ConfigModel.LocalData["LocalBasePath"] + "\\" + DestinationPath + "\\" + FileName;
             }
         }
 

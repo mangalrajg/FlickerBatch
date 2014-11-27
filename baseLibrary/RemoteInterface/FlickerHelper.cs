@@ -3,12 +3,8 @@ using baseLibrary.Model;
 using FlickrNet;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace baseLibrary.RemoteInterface
@@ -16,12 +12,13 @@ namespace baseLibrary.RemoteInterface
     public static class FlickerHelper
     {
         public static Flickr flickr = null;
-        static String ApiKey = "6c5f9affbbd5f9f96054300504900e92";
-        static String SharedSecret = "c9fbcf157653bcd9";
+        private static String ApiKey = "6c5f9affbbd5f9f96054300504900e92";
+        private static String SharedSecret = "c9fbcf157653bcd9";
         private static List<EventWaitHandle> threadFinishEvents = new List<EventWaitHandle>();
 
-        public static void Flickr_Auth(Dictionary<string, string> auth_data)
+        static FlickerHelper()
         {
+            Dictionary<string, string> auth_data = DatabaseHelper.LoadMasterConfigData("AUTH");
             flickr = new Flickr(ApiKey, SharedSecret);
             String accessTokenStr = "";
             OAuthAccessToken accessToken = null;
@@ -45,7 +42,7 @@ namespace baseLibrary.RemoteInterface
                 writer.Serialize(sw, accessToken);
                 auth_data["AuthToken"] = AuthToken;
                 auth_data["AccessTokenStr"] = sw.ToString();
-
+                DatabaseHelper.SaveConfigData("AUTH", auth_data);
             }
             flickr.OAuthAccessToken = accessToken.Token;
             flickr.OAuthAccessTokenSecret = accessToken.TokenSecret;
@@ -57,10 +54,10 @@ namespace baseLibrary.RemoteInterface
             if (retPs.Count == 0)
             {
                 Console.WriteLine("Loading Albums from Flicker..... ");
-                PhotosetCollection psc = flickr.PhotosetsGetList(); 
+                PhotosetCollection psc = flickr.PhotosetsGetList();
                 foreach (Photoset ps in psc)
                 {
-                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos,ps.Description, DateTime.Now);
+                    FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
                     retPs.Add(fad);
                 }
                 Console.WriteLine("Saving Albums in local DB ..... ");
@@ -69,20 +66,21 @@ namespace baseLibrary.RemoteInterface
             return retPs;
         }
 
-        public static void savePictures(FlickrAlbumData ps)
+        public static void DownloadPicturesMetaData(FlickrAlbumData ps)
         {
             int numPage = 0;
-            while (ps.NumberOfPhotos > numPage * 500  )
+            while (ps.NumberOfPhotos > numPage * 500)
             {
                 numPage++;
                 Console.WriteLine("Loading Album Info(Async): " + ps.Name);
                 var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
                 threadFinishEvents.Add(threadFinish);
+                #region flickr.PhotosetsGetPhotosAsync
                 flickr.PhotosetsGetPhotosAsync(ps.AlbumId, PhotoSearchExtras.All, numPage, 500, delegate(FlickrResult<PhotosetPhotoCollection> result)
                 {
                     if (result.HasError == false)
                     {
-                        List<BaseImageData> retList; 
+                        List<BaseImageData> retList;
                         List<BaseImageData> allPics = new List<BaseImageData>();
                         foreach (Photo p in result.Result)
                         {
@@ -110,13 +108,12 @@ namespace baseLibrary.RemoteInterface
 
                     }
                     threadFinish.Set();
-
                 }
                 );
-
+                #endregion
                 if (threadFinishEvents.Count > 60)
                 {
-                    Mutex.WaitAll(threadFinishEvents.ToArray(),150000);
+                    Mutex.WaitAll(threadFinishEvents.ToArray(), 150000);
                     threadFinishEvents.Clear();
                 }
             }
@@ -124,7 +121,23 @@ namespace baseLibrary.RemoteInterface
             return;
         }
 
+        public static void RenameImage(List<RemoteImageData> ridList, String newAlbumName)
+        {
+            String tmpAlbumName = "";
+            String oldAblumId = "";
+            String newAblumId = DatabaseHelper.GetAlbumID(newAlbumName);
 
+            foreach (RemoteImageData rid in ridList)
+            {
+                if (rid.Album != tmpAlbumName)
+                {
+                    oldAblumId = DatabaseHelper.GetAlbumID(rid.Album);
+                    tmpAlbumName = rid.Album;
+                }
+                flickr.PhotosetsRemovePhoto(oldAblumId, rid.PhotoId);
+                flickr.PhotosetsAddPhoto(newAblumId, rid.PhotoId);
+            }
+        }
 
         public static void WaitForAllThreads()
         {
@@ -134,5 +147,7 @@ namespace baseLibrary.RemoteInterface
                 threadFinishEvents.Clear();
             }
         }
+
+
     }
 }

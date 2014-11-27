@@ -12,7 +12,7 @@ namespace baseLibrary.LocalInterface
 {
     public static class FilesystemHelper
     {
-        public static List<BaseImageData> getFileList(String baseDir)
+        private static List<BaseImageData> getFileList(String baseDir)
         {
             List<BaseImageData> lidList = new List<BaseImageData>();
             foreach (String dList in Directory.GetDirectories(baseDir))
@@ -33,8 +33,8 @@ namespace baseLibrary.LocalInterface
                     fileName.EndsWith(".mpg", System.StringComparison.CurrentCultureIgnoreCase) ||
                     fileName.EndsWith(".mp4", System.StringComparison.CurrentCultureIgnoreCase) ||
                     fileName.EndsWith(".png", System.StringComparison.CurrentCultureIgnoreCase) ||
-                    fileName.EndsWith(".wmv", System.StringComparison.CurrentCultureIgnoreCase) 
-)
+                    fileName.EndsWith(".wmv", System.StringComparison.CurrentCultureIgnoreCase)
+                )
                 {
                     ImageInfo ii = new ImageInfo();
                     ii.Load(fileName, ImageInfo.FileTypes.FileTypeUnknown);
@@ -42,7 +42,7 @@ namespace baseLibrary.LocalInterface
                     lidList.Add(lid);
                 }
             }
-            Console.WriteLine("Count= " + lidList.Count + "\t Processed Dir: " + baseDir );
+            Console.WriteLine("Count= " + lidList.Count + "\t Processed Dir: " + baseDir);
             if (lidList.Count > 1000)
             {
                 Console.WriteLine("Loaded PicsCount = " + lidList.Count + " Saving Data..");
@@ -50,21 +50,18 @@ namespace baseLibrary.LocalInterface
                 lidList.Clear();
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             return lidList;
         }
+        public static void SaveLocalImageData(String baseDir)
+        {
+            DatabaseHelper.DeleteLocalImageData(baseDir);
+            List<BaseImageData> lidList = getFileList(ConfigModel.LocalData["LocalBasePath"] + "\\" + baseDir);
+            DatabaseHelper.SaveImageData(lidList);
+            DatabaseHelper.RemovePrefix(ConfigModel.LocalData["LocalBasePath"]);
+            lidList.Clear();
+
+
+        }
     }
+
 }

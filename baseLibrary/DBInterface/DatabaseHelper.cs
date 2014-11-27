@@ -16,7 +16,8 @@ namespace baseLibrary.DBInterface
     {
         private static Object concurrencyObj = new object();
         private static String dbProvider = "System.Data.SQLite";
-        private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
+//        private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
+        private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
         #region Static SQLs
         private static String _loadLocalDuplicatesSQL = @"select  path src,path2 dest, count(1) numPics from 
@@ -196,7 +197,7 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = String.Format(_loadLocalDuplicateImagesSQL, SourcePath, DestinationPath);
+                    mycommand.CommandText = String.Format(_loadLocalDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
 
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
@@ -420,12 +421,44 @@ namespace baseLibrary.DBInterface
 
         }
 
-        //public static void RemovePrefix(string p)
-        //{
-        //    ExecuteNonQuery(String.Format("update " + TableNames.LOCAL_DATA + " set PATH=substr(PATH,{0}) where PATH like '{1}%'", p.Length + 2, p));
-        //    //ExecuteNonQuery(String.Format("update " + TableNames.REMOTE_DATA + " set ALBUM=substr(ALBUM,{0}) where ALBUM like '{1}%'", p.Length + 2, p));
-        //}
+        public static void RemovePrefix(string albumName)
+        {
+            ExecuteNonQuery(String.Format("update " + TableNames.LOCAL_DATA + " set PATH=substr(PATH,{0}) where PATH like '{1}%'", albumName.Length + 2, albumName));
+            //ExecuteNonQuery(String.Format("update " + TableNames.REMOTE_DATA + " set ALBUM=substr(ALBUM,{0}) where ALBUM like '{1}%'", albumName.Length + 2, albumName));
+        }
 
+
+        public static string GetAlbumID(string albumName)
+        {
+            String ret = null;
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+
+                    mycommand.CommandText = String.Format("SELECT ID FROM " + TableNames.FLICKR_ALBUMS + " WHERE NAME='{0}';", GenericHelper.StringSQLite(albumName));
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    reader.Read();
+                    ret = reader.GetString(0);
+                }
+                cnn.Close();
+            }
+            return ret;
+            
+        }
+
+        public static void DeleteLocalImageData(string baseDir)
+        {
+            ExecuteNonQuery(String.Format("DELETE from LOCAL_DATA where PATH='{0}';",GenericHelper.StringSQLite(baseDir)));
+        }
+
+        public static void DeleteRemoteImageData(string albumName)
+        {
+            ExecuteNonQuery(String.Format("DELETE from REMOTE_DATA where ALBUM='{0}';", GenericHelper.StringSQLite(albumName)));
+        }
     }
 
 }
