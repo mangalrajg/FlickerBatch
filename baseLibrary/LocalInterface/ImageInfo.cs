@@ -147,7 +147,7 @@ namespace FlickrSync
 
                         Country = (string)bitmapMetadata.GetQuery(@"/xmp/<xmpbag>photoshop:Country");
                         if (string.IsNullOrEmpty(Country))
-                            Country = (string)bitmapMetadata.GetQuery(@"/app13/irb/8bimiptc/iptc/country\/primary location name");
+                            Country = (string)bitmapMetadata.GetQuery(@"/app13/irb/8bimiptc/iptc/country\/primary location date_taken");
 
                         if (Country == null)
                             Country = "";

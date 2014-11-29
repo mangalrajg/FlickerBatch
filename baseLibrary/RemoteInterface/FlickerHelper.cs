@@ -125,7 +125,7 @@ namespace baseLibrary.RemoteInterface
                 while (ps.NumberOfPhotos > numPage * 500)
                 {
                     numPage++;
-                    Console.WriteLine("Loading Album Info: " + ps.Name);
+                    Console.WriteLine("Loading Album Info: " + ps.Name + "  Page:" + numPage);
                     PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
                     foreach (Photo p in ppc)
                     {
@@ -134,7 +134,7 @@ namespace baseLibrary.RemoteInterface
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
@@ -171,8 +171,16 @@ namespace baseLibrary.RemoteInterface
 
         public static void MovePicture(string photoID, string oldAblumId, string newAlbumId)
         {
-            flickr.PhotosetsRemovePhoto(oldAblumId, photoID);
-            flickr.PhotosetsAddPhoto(newAlbumId, photoID);
+            try
+            {
+                flickr.PhotosetsRemovePhoto(oldAblumId, photoID);
+                flickr.PhotosetsAddPhoto(newAlbumId, photoID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.ToString());
+                throw ex;
+            }
         }
 
         public static FlickrAlbumData CreateAlbumAndMovePicture(string photoID, string oldAblumId, string newAlbumName)
@@ -182,6 +190,52 @@ namespace baseLibrary.RemoteInterface
 
             return new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
 
+        }
+
+        internal static void MovePictures(string[] photoIDList, string oldAblumId, string newAlbumId)
+        {
+            try
+            {
+                flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
+                foreach (String photoID in photoIDList)
+                {
+                    Console.Write(".");
+                    flickr.PhotosetsAddPhoto(newAlbumId, photoID);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.ToString());
+                throw ex;
+            }
+            Console.WriteLine("");
+        }
+
+        internal static FlickrAlbumData CreateAlbumAndMovePictures(string[] photoIDList, string oldAblumId, string newAlbumName)
+        {
+            FlickrAlbumData fad = null;
+            try
+            {
+                flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
+                if (photoIDList.Length > 0)
+                {
+                    Photoset ps = flickr.PhotosetsCreate(newAlbumName, photoIDList[0]);
+                    fad = new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                    foreach (String photoID in photoIDList)
+                    {
+                        Console.Write(".");
+                        if (photoID != photoIDList[0])
+                            flickr.PhotosetsAddPhoto(ps.PhotosetId, photoID);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.ToString());
+                throw ex;
+            }
+            Console.WriteLine("");
+            return fad;
         }
     }
 }

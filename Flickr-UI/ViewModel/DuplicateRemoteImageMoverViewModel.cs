@@ -38,14 +38,14 @@ namespace Flickr_UI
             set
             {
                 _DuplicateImageCollection = value;
-                NotifyPropertyChanged("DuplicateImageCollection");
+                NotifyPropertyChanged("ImagesToUploadCollection");
             }
         }
 
         public DuplicateRemoteImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
-            // DuplicateImageCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
+            // ImagesToUploadCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
             CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesRemoteCommand, MoveImages, MoveImagesSomething);
@@ -56,31 +56,49 @@ namespace Flickr_UI
 
         private void MoveImages(object sender, ExecutedRoutedEventArgs e)
         {
-            foreach (DuplicateImageData di in SelectedItem.ImageDetails)
+            int i = 1;
+            try
             {
-                Console.WriteLine("Move " + di.SourcePath + " to " + di.DestinationPath);
-                if (FlickerCache.AlbumSearchDict.ContainsKey(di.SourcePath))
+                List<String> backupList = new List<string>();
+                List<String> moveList = new List<string>();
+                foreach (DuplicateImageData di in SelectedItem.ImageDetails)
                 {
-                    RemoteImageData rid =  FlickerCache.getImageData(di.FileName, di.DestinationPath);
-                    if (rid != null)
+                    Console.WriteLine(i + "/" + SelectedItem.ImageDetails.Count + " : Move " + di.FileName + " From " + di.SourcePath + " to " + di.DestinationPath);
+                    if (FlickerCache.AlbumSearchDict.ContainsKey(di.SourcePath))
                     {
-                        String tmpFolder = ConfigModel.RemoteData["RemoteTempAlbum"] + "\\" + di.SourcePath;
-                        FlickerCache.MovePicture(di.FileName, di.DestinationPath, tmpFolder);
+                        RemoteImageData rid = FlickerCache.getImageData(di.FileName, di.DestinationPath);
+                        if (rid != null)
+                        {
+                            backupList.Add(di.FileName);
+                        }
+                        moveList.Add(di.FileName);
                     }
-                    FlickerCache.MovePicture(di.FileName, di.SourcePath, di.DestinationPath);
-                    di.IsProcessed = true;
+                    else
+                    {
+                        Console.WriteLine("Album: " + di.SourcePath + " Not FOUND");
+                    }
+                    i++;
                 }
 
+                String tmpFolder = ConfigModel.RemoteData["RemoteTempAlbum"] + "\\" + SelectedItem.SourcePath;
+                FlickerCache.MovePictures(backupList, SelectedItem.DestinationPath, tmpFolder);
+                FlickerCache.MovePictures(moveList, SelectedItem.SourcePath, SelectedItem.DestinationPath);
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An Exception has been detected : " + ex.ToString());
+            }
+            Console.WriteLine("");
             FlickerCache.SaveRemoteAlbum(SelectedItem.SourcePath);
             FlickerCache.SaveRemoteAlbum(SelectedItem.DestinationPath);
             this.LoadDuplicateImages();
+            Console.WriteLine("---------------------------------------------");
 
         }
 
         private void MoveImagesSomething(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = SelectedItem != null ;
         }
 
         //void Students_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -89,6 +107,7 @@ namespace Flickr_UI
         //}
         private void LoadDuplicateImages()
         {
+            DuplicateImageCollection.Clear();
             List<DuplicateImageGroupData> imgData = DatabaseHelper.LoadRemoteDuplicateImageData();
             foreach (DuplicateImageGroupData did in imgData)
             {

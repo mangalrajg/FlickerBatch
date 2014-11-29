@@ -59,6 +59,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModel\ConfigureViewModel.cs" />
     <Compile Include="ViewModel\DuplicateRemoteImageMoverViewModel.cs" />
+    <Compile Include="ViewModel\FindImagesToUploadViewModel.cs" />
     <Compile Include="Views\AlbumRenameView.xaml.cs">
       <DependentUpon>AlbumRenameView.xaml</DependentUpon>
     </Compile>
@@ -76,6 +77,9 @@
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="Views\DuplicateRemoteImageMoverView.xaml.cs">
       <DependentUpon>DuplicateRemoteImageMoverView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FindImagesToUploadView.xaml.cs">
+      <DependentUpon>FindImagesToUploadView.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\AlbumRenameView.xaml">
       <SubType>Designer</SubType>
@@ -102,6 +106,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\DuplicateRemoteImageMoverView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FindImagesToUploadView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

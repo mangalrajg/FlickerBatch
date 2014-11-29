@@ -59,6 +59,29 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
+        #region FindImagesToUploadCommand
+        private ICommand _FindImagesToUploadCommand;
+        public ICommand FindImagesToUploadCommand
+        {
+            get
+            {
+                if (_FindImagesToUploadCommand == null)
+                {
+                    _FindImagesToUploadCommand = new GenericCommand(param => this.SetFindImagesToUploadViewModel(param), null);
+                }
+                return _FindImagesToUploadCommand;
+            }
+        }
+
+        private object SetFindImagesToUploadViewModel(object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new FindImagesToUploadView());
+            (param as Grid).DataContext = new FindImagesToUploadViewModel();
+            return null;
+        }
+        #endregion
+
 
         #region AlbumRenameCommand
         private ICommand _AlbumRenameCommand;

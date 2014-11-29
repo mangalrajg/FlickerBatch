@@ -39,7 +39,7 @@ namespace Flickr_UI
             set
             {
                 _DuplicateImageCollection = value;
-                NotifyPropertyChanged("DuplicateImageCollection");
+                NotifyPropertyChanged("ImagesToUploadCollection");
             }
         }
 
@@ -48,7 +48,7 @@ namespace Flickr_UI
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
             this.LoadDuplicateImages();
 
-            CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesCommand, MoveImages, MoveImagesSomething);
+            CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesLocalCommand, MoveImages, MoveImagesSomething);
             CommandManager.RegisterClassCommandBinding(typeof(DuplicateLocalImageMoverView), binding);
 
 
@@ -79,7 +79,7 @@ namespace Flickr_UI
 
         private void MoveImagesSomething(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = SelectedItem != null;
         }
 
         private void LoadDuplicateImages()

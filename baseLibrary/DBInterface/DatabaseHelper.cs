@@ -224,7 +224,7 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = String.Format(_loadRemoteDuplicateImagesSQL, SourcePath, DestinationPath);
+                    mycommand.CommandText = String.Format(_loadRemoteDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
 
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
@@ -301,6 +301,38 @@ namespace baseLibrary.DBInterface
                 cnn.Close();
             }
             return fadList;
+
+        }
+
+        public static List<LocalImageData> LoadImagesToUpload()
+        {
+            String sql = "SELECT * FROM " + TableNames.LOCAL_DATA + " WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (SELECT UPPER(TITLE||'.jpg'|| DATE_TAKEN) FROM " + TableNames.REMOTE_DATA + ");";
+            List<LocalImageData> localImageList = new List<LocalImageData>();
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+
+                    mycommand.CommandText = sql;
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String fileName = (String)reader["FILENAME"];
+                        String date_taken = (String)reader["DATE_TAKEN"];
+                        String description = (String)reader["DESCRIPTION"];
+                        int size = Convert.ToInt32((Int64)reader["SIZE"]);
+                        String path = (String)reader["PATH"];
+                        String sync_date = (String)reader["SYNC_DATE"];
+                        localImageList.Add(new LocalImageData(fileName, GenericHelper.DateTimeSQLite(date_taken), description, path,size));
+                    }
+
+                }
+                cnn.Close();
+            }
+            return localImageList;
 
         }
 
@@ -460,6 +492,7 @@ namespace baseLibrary.DBInterface
 
         public static void DeleteRemoteImageData(string albumName)
         {
+            Console.WriteLine("Delete Album: " + albumName + " from database");
             ExecuteNonQuery(String.Format("DELETE from REMOTE_DATA where ALBUM='{0}';", GenericHelper.StringSQLite(albumName)));
         }
 
