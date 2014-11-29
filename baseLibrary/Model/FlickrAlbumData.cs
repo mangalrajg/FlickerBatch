@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace baseLibrary.Model
 {
-    public class FlickrAlbumData
+    public class FlickrAlbumData : GenericAlbumData
     {
         private static String _InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}')";
         public static String CheckSQL = "";
@@ -31,24 +31,21 @@ namespace baseLibrary.Model
         {
             get
             {
-                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + " WHERE ID='{0}';",AlbumId);
+                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + " WHERE ID='{0}';", AlbumId);
             }
         }
 
 
         public String AlbumId { get; set; }
-        public String Name { get; set; }
         public DateTime DateCreated { get; set; }
-        public int NumberOfPhotos { get; set; }
         public String Description { get; set; }
-        public DateTime SyncDate{ get; set; }
+        public DateTime SyncDate { get; set; }
 
         public FlickrAlbumData(String albumId, String name, DateTime dateTaken, int NumberOfPhotos, String desc, DateTime syncDate)
+            : base(name, NumberOfPhotos)
         {
             this.AlbumId = albumId;
-            this.Name = name;
             this.DateCreated = dateTaken;
-            this.NumberOfPhotos = NumberOfPhotos;
             this.Description = desc;
             this.SyncDate = syncDate;
         }

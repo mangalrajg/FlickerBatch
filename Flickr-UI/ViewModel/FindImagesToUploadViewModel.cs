@@ -1,5 +1,6 @@
 ﻿using baseLibrary.DBInterface;
 using baseLibrary.Model;
+using baseLibrary.RemoteInterface;
 using Flickr_UI.Views;
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,8 @@ namespace Flickr_UI.ViewModel
             }
         }
 
-        private ObservableCollection<LocalImageData> _ImagesToUploadCollection;
-        public ObservableCollection<LocalImageData> ImagesToUploadCollection
+        private ObservableCollection<LocalAlbumData> _ImagesToUploadCollection;
+        public ObservableCollection<LocalAlbumData> ImagesToUploadCollection
         {
             get
             {
@@ -42,30 +43,49 @@ namespace Flickr_UI.ViewModel
         }
         public FindImagesToUploadViewModel()
         {
-            ImagesToUploadCollection = new ObservableCollection<LocalImageData>();
-            this.LoadDuplicateImages();
+            ImagesToUploadCollection = new ObservableCollection<LocalAlbumData>();
+            this.LoadImagesToUpload();
 
-            CommandBinding binding = new CommandBinding(StaticCommands.FindImagesToUploadCommand, FindImagesToUpload, FindImagesToUploadSomething);
+            CommandBinding binding = new CommandBinding(StaticCommands.UploadCommand, UploadImages, CanUploadImages);
             CommandManager.RegisterClassCommandBinding(typeof(FindImagesToUploadView), binding);
         }
 
-        private void LoadDuplicateImages()
+        private void LoadImagesToUpload()
         {
-            List<LocalImageData> imgList = DatabaseHelper.LoadImagesToUpload();
-            foreach (LocalImageData did in imgList)
+            ImagesToUploadCollection.Clear();
+            List<GenericAlbumData> imgList = DatabaseHelper.LoadAlbumsToUpload();
+            foreach (GenericAlbumData gid in imgList)
             {
-                ImagesToUploadCollection.Add(did);
+                ImagesToUploadCollection.Add(new LocalAlbumData(gid));
             }
         }
 
-        private void FindImagesToUploadSomething(object sender, CanExecuteRoutedEventArgs e)
+        private void CanUploadImages(object sender, CanExecuteRoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            e.CanExecute = true;
         }
 
-        private void FindImagesToUpload(object sender, ExecutedRoutedEventArgs e)
+        private void UploadImages(object sender, ExecutedRoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            FindImagesToUploadView view = (sender as FindImagesToUploadView);
+            var selectedItems = view.MainGrid.SelectedItems;
+            foreach (LocalAlbumData lad in selectedItems)
+            {
+                String albumName = lad.Name;
+                List<String> fileNames = new List<string>();
+
+                foreach (LocalImageData lid in lad.ImageDetails)
+                {
+                    Console.WriteLine("Upload:" + lid.Name + " in Album: " + albumName);
+                    fileNames.Add(lid.Name);
+                }
+                FlickerCache.UploadImages(fileNames, albumName);
+                Console.WriteLine("Save Images of Album :" + albumName);
+                FlickerCache.SaveRemoteAlbum(albumName);
+            }
+
+            this.LoadImagesToUpload();
+
         }
     }
 }

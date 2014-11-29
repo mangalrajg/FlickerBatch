@@ -59,7 +59,7 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
-        #region FindImagesToUploadCommand
+        #region UploadCommand
         private ICommand _FindImagesToUploadCommand;
         public ICommand FindImagesToUploadCommand
         {

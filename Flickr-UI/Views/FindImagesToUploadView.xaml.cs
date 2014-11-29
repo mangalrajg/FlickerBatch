@@ -24,5 +24,13 @@ namespace Flickr_UI.Views
         {
             InitializeComponent();
         }
+
+        private void MainGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (MainGrid.RowDetailsVisibilityMode == DataGridRowDetailsVisibilityMode.VisibleWhenSelected)
+                MainGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
+            else
+                MainGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+        }
     }
 }

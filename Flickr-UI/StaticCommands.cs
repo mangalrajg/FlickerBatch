@@ -27,7 +27,7 @@ namespace Flickr_UI
         }
 
         private static readonly RoutedUICommand _FindImagesToUploadCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
-        public static RoutedUICommand FindImagesToUploadCommand
+        public static RoutedUICommand UploadCommand
         {
             get
             {

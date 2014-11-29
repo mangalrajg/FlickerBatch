@@ -5,6 +5,7 @@ namespace baseLibrary.Model
 {
     public class LocalImageData : BaseImageData
     {
+        #region SQLs
         public override String InsertSQL
         {
             get
@@ -24,6 +25,7 @@ namespace baseLibrary.Model
 
         public static String sCheckSQL = "Select count(1) from " + TableNames.LOCAL_DATA
             + " where FILENAME='{0}' and PATH='{1}' and SIZE={2}";
+        #endregion
 
         public String Path { get; set; }
         public long Size { get; set; }

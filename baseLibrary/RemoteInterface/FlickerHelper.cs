@@ -237,5 +237,77 @@ namespace baseLibrary.RemoteInterface
             Console.WriteLine("");
             return fad;
         }
+
+        public static List<String> UploadImage(List<String> fileNames, String folder)
+        {
+            List<String> photoIdList = new List<string>();
+            foreach (String filename in fileNames)
+            {
+                FileStream fs = new FileStream(folder + "\\" + filename, FileMode.Open, FileAccess.Read);
+                var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
+                threadFinishEvents.Add(threadFinish);
+
+                flickr.UploadPictureAsync(fs, filename, filename, "", "", false, false, false, ContentType.Photo, SafetyLevel.Safe, HiddenFromSearch.None, r1 =>
+                    {
+                        FlickrResult<string> result = r1;
+                        if (result.HasError == false)
+                        {
+                            String photoId = result.Result;
+                            if (photoId != null)
+                                photoIdList.Add(photoId);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error uploading " + filename + " Album:" + folder);
+                        }
+                        threadFinish.Set();
+                    });
+                if (threadFinishEvents.Count > 3)
+                {
+                    Mutex.WaitAll(threadFinishEvents.ToArray(), 150000);
+                    threadFinishEvents.Clear();
+                }
+
+            }
+            WaitForAllThreads();
+            return photoIdList;
+        }
+
+
+        internal static void AddImagesToAlbum(List<string> photoIDList, string albumId)
+        {
+            foreach (String photoID in photoIDList)
+            {
+                Console.Write(".");
+                flickr.PhotosetsAddPhoto(albumId, photoID);
+            }
+            Console.WriteLine("");
+        }
+
+        internal static FlickrAlbumData CreateAlbumAndAddPictures(List<string> photoIDList, string albumName)
+        {
+            FlickrAlbumData fad = null;
+            try
+            {
+                if (photoIDList.Count > 0)
+                {
+                    Photoset ps = flickr.PhotosetsCreate(albumName, photoIDList[0]);
+                    fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                    foreach (String photoID in photoIDList)
+                    {
+                        Console.Write(".");
+                        if (photoID != photoIDList[0])
+                            flickr.PhotosetsAddPhoto(ps.PhotosetId, photoID);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.ToString());
+                throw ex;
+            }
+            Console.WriteLine("");
+            return fad;
+        }
     }
 }
