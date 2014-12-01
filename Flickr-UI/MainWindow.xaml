@@ -12,7 +12,7 @@
             </Ribbon.ApplicationMenu>
             <RibbonTab Header="Image Manager">
                 <RibbonGroup>
-                    <RibbonButton Label="Build Local Images Database" LargeImageSource="images/flickr.png"/>
+                    <RibbonButton Label="Build Local Images Database" LargeImageSource="images/flickr.png" Command="{Binding LoadLocalImageDataCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                     <RibbonButton Label="Find Images to copy" LargeImageSource="images/flickr.png" />
                     <RibbonButton Label="Sync With Backup folder" LargeImageSource="images/flickr.png"/>
                     <RibbonButton Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateLocalImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
@@ -22,7 +22,7 @@
             <RibbonTab Header="Flicker">
                 <RibbonGroup>
                     <RibbonButton  Label="Test Connection" LargeImageSource="images/flickr.png"/>
-                    <RibbonButton  Label="Build Remote Image Database" LargeImageSource="images/load.png" />
+                    <RibbonButton  Label="Build Remote Image Database" LargeImageSource="images/load.png" Command="{Binding LoadRemoteImageDataCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                     <RibbonButton  Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateRemoteImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
 
                     <RibbonButton  Label="Find Images to Upload" LargeImageSource="images/upload.png" Command="{Binding FindImagesToUploadCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
@@ -32,7 +32,34 @@
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>
-        <Grid Name="MainGrid" DockPanel.Dock="Bottom" Margin="10,10,10,10">
+        <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" >
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem BorderThickness="1" Margin="0,-3,0,-2">
+                <TextBlock x:Name="statusBarText">www.247moneymakingschemes.blogspot.com</TextBlock>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1">
+                <ProgressBar Value="30" Width="80" Height="18" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="3">
+                <TextBlock>Go!</TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+
+        <Grid Name="MainGrid" DockPanel.Dock="Left" Margin="10,10,10,10">
         </Grid>
     </DockPanel>
 </RibbonWindow>

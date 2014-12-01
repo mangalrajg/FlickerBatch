@@ -10,7 +10,6 @@ namespace baseLibrary.Model
     public class FlickrAlbumData : GenericAlbumData
     {
         private static String _InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}')";
-        public static String CheckSQL = "";
         public String InsertSQL
         {
             get
@@ -26,7 +25,6 @@ namespace baseLibrary.Model
                 return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + ";");
             }
         }
-
         public String DeleteSQL
         {
             get

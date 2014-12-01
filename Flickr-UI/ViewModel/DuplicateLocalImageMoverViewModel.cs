@@ -39,7 +39,7 @@ namespace Flickr_UI
             set
             {
                 _DuplicateImageCollection = value;
-                NotifyPropertyChanged("ImagesToUploadCollection");
+                NotifyPropertyChanged("RemoteAlbumList");
             }
         }
 

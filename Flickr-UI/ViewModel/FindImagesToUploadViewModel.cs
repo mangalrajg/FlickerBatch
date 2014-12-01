@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -14,8 +15,9 @@ namespace Flickr_UI.ViewModel
 {
     public class FindImagesToUploadViewModel : ViewModelBase
     {
-        private LocalImageData _SelectedItem;
-        public LocalImageData SelectedItem
+
+        private LocalAlbumUploadData _SelectedItem;
+        public LocalAlbumUploadData SelectedItem
         {
             get
             {
@@ -28,8 +30,8 @@ namespace Flickr_UI.ViewModel
             }
         }
 
-        private ObservableCollection<LocalAlbumData> _ImagesToUploadCollection;
-        public ObservableCollection<LocalAlbumData> ImagesToUploadCollection
+        private ObservableCollection<LocalAlbumUploadData> _ImagesToUploadCollection;
+        public ObservableCollection<LocalAlbumUploadData> ImagesToUploadCollection
         {
             get
             {
@@ -38,12 +40,12 @@ namespace Flickr_UI.ViewModel
             set
             {
                 _ImagesToUploadCollection = value;
-                NotifyPropertyChanged("ImagesToUploadCollection");
+                NotifyPropertyChanged("RemoteAlbumList");
             }
         }
         public FindImagesToUploadViewModel()
         {
-            ImagesToUploadCollection = new ObservableCollection<LocalAlbumData>();
+            ImagesToUploadCollection = new ObservableCollection<LocalAlbumUploadData>();
             this.LoadImagesToUpload();
 
             CommandBinding binding = new CommandBinding(StaticCommands.UploadCommand, UploadImages, CanUploadImages);
@@ -52,11 +54,11 @@ namespace Flickr_UI.ViewModel
 
         private void LoadImagesToUpload()
         {
-            ImagesToUploadCollection.Clear();
             List<GenericAlbumData> imgList = DatabaseHelper.LoadAlbumsToUpload();
+            ImagesToUploadCollection.Clear();
             foreach (GenericAlbumData gid in imgList)
             {
-                ImagesToUploadCollection.Add(new LocalAlbumData(gid));
+                ImagesToUploadCollection.Add(new LocalAlbumUploadData(gid));
             }
         }
 
@@ -69,22 +71,40 @@ namespace Flickr_UI.ViewModel
         {
             FindImagesToUploadView view = (sender as FindImagesToUploadView);
             var selectedItems = view.MainGrid.SelectedItems;
-            foreach (LocalAlbumData lad in selectedItems)
+            List<LocalAlbumUploadData> selectedItemList = new List<LocalAlbumUploadData>();
+
+            foreach (LocalAlbumUploadData lad in selectedItems)
+            {
+                selectedItemList.Add(lad);
+            }
+            Action<Object> del = UploadImage;
+            Task t = Task.Factory.StartNew(del, selectedItemList);
+            t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
+            //ThreadPool.QueueUserWorkItem(new WaitCallback(LoadFromFlicker), selectedItemList);
+
+        }
+
+        private void OnTaskComplete(Task t)
+        {
+            this.LoadImagesToUpload();
+        }
+
+        public void UploadImage(Object sender)
+        {
+            List<LocalAlbumUploadData> selectedItems = (sender as List<LocalAlbumUploadData>);
+            foreach (LocalAlbumUploadData lad in selectedItems)
             {
                 String albumName = lad.Name;
                 List<String> fileNames = new List<string>();
-
                 foreach (LocalImageData lid in lad.ImageDetails)
                 {
-                    Console.WriteLine("Upload:" + lid.Name + " in Album: " + albumName);
                     fileNames.Add(lid.Name);
                 }
+                Console.WriteLine("Upload Album: " + albumName + " Count=" + fileNames.Count);
                 FlickerCache.UploadImages(fileNames, albumName);
                 Console.WriteLine("Save Images of Album :" + albumName);
                 FlickerCache.SaveRemoteAlbum(albumName);
             }
-
-            this.LoadImagesToUpload();
 
         }
     }

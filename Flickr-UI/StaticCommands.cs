@@ -43,6 +43,50 @@ namespace Flickr_UI
                 return _FindImagesToRenameCommand;
             }
         }
+        private static readonly RoutedUICommand _LoadFromDBCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand LoadFromDBCommand
+        {
+            get
+            {
+                return _LoadFromDBCommand;
+            }
+        }
+
+        private static readonly RoutedUICommand _LoadFromFileCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand LoadFromFileCommand
+        {
+            get
+            {
+                return _LoadFromFileCommand;
+            }
+        }
+
+        private static readonly RoutedUICommand _LoadBaseDirFromFileCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand LoadBaseDirFromFileCommand
+        {
+            get
+            {
+                return _LoadBaseDirFromFileCommand;
+            }
+        }
+
+        private static readonly RoutedUICommand _LoadAllAlbumsFromFlicker = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand LoadAllAlbumsFromFlicker
+        {
+            get
+            {
+                return _LoadAllAlbumsFromFlicker;
+            }
+        }
+
+        private static readonly RoutedUICommand _LoadAlbumsFromFlicker = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand LoadAlbumsFromFlicker
+        {
+            get
+            {
+                return _LoadAlbumsFromFlicker;
+            }
+        }
 
     }
 }

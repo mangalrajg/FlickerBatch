@@ -34,7 +34,7 @@ namespace FlickerBatch_AlbumRetriever
             if (config.TryGetValue("SaveLocalData", out saveLocalData) && saveLocalData == "TRUE")
             {
                 Dictionary<string, string> local_data = DatabaseHelper.LoadMasterConfigData("LOCAL");
-                FilesystemHelper.SaveLocalImageData(local_data["LocalBasePath"]);
+                FilesystemHelper.SaveLocalImageData(ConfigModel.LocalData["LocalBasePath"]);
                 //DatabaseHelper.RemovePrefix(local_data["LocalBasePath"]);
             }
 

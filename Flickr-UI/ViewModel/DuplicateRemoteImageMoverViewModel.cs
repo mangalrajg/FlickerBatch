@@ -38,14 +38,14 @@ namespace Flickr_UI
             set
             {
                 _DuplicateImageCollection = value;
-                NotifyPropertyChanged("ImagesToUploadCollection");
+                NotifyPropertyChanged("RemoteAlbumList");
             }
         }
 
         public DuplicateRemoteImageMoverViewModel()
         {
             DuplicateImageCollection = new ObservableCollection<DuplicateImageGroupData>();
-            // ImagesToUploadCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
+            // RemoteAlbumList.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
             this.LoadDuplicateImages();
 
             CommandBinding binding = new CommandBinding(StaticCommands.MoveImagesRemoteCommand, MoveImages, MoveImagesSomething);

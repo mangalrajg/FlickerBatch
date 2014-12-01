@@ -3,6 +3,7 @@ using baseLibrary.Model;
 using FlickrNet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Xml.Serialization;
@@ -46,7 +47,14 @@ namespace baseLibrary.RemoteInterface
             }
             flickr.OAuthAccessToken = accessToken.Token;
             flickr.OAuthAccessTokenSecret = accessToken.TokenSecret;
+            flickr.OnUploadProgress += flickr_OnUploadProgress;
         }
+        static void flickr_OnUploadProgress(object sender, UploadProgressEventArgs e)
+        {
+            Console.WriteLine(e.ProcessPercentage + "% of " + e.TotalBytesToSend + " " );
+        }
+
+
 
         public static List<FlickrAlbumData> LoadAllAlbums()
         {
@@ -129,7 +137,12 @@ namespace baseLibrary.RemoteInterface
                     PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
                     foreach (Photo p in ppc)
                     {
-                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
+                        DateTime date_taken = p.DateTaken;
+                        if (p.DateTaken > DateTime.Today)
+                        {
+                            date_taken = new DateTime(2000, 1, 1);
+                        }
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, date_taken, p.Description);
                         allPics.Add(rid);
                     }
                 }
@@ -238,76 +251,133 @@ namespace baseLibrary.RemoteInterface
             return fad;
         }
 
-        public static List<String> UploadImage(List<String> fileNames, String folder)
+        //public static List<String> UploadImage(List<String> fileNames, String folder)
+        //{
+        //    List<String> photoIdList = new List<string>();
+        //    foreach (String filename in fileNames)
+        //    {
+        //        FileStream fs = new FileStream(folder + "\\" + filename, FileMode.Open, FileAccess.Read);
+        //        try
+        //        {
+        //            Console.Write(photoIdList.Count + 1 + "/" + fileNames.Count + ") Upload:" + filename + " Album:" + folder);
+        //            flickr.HttpTimeout = 1000000;
+        //            String photoId = flickr.UploadPicture(fs, filename, filename, "", "", false, false, false, ContentType.Photo, SafetyLevel.Safe, HiddenFromSearch.None);
+        //            Console.WriteLine(" Id=" + photoId + " Completed");
+        //            if (photoId != null)
+        //                photoIdList.Add(photoId);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("Exception:" + ex.ToString());
+        //        }
+
+        //    }
+        //    return photoIdList;
+        //}
+
+
+        //internal static void AddImagesToAlbum(List<string> photoIDList, string albumId)
+        //{
+        //    foreach (String photoID in photoIDList)
+        //    {
+        //        Console.Write(".");
+        //        flickr.PhotosetsAddPhoto(albumId, photoID);
+        //    }
+        //    Console.WriteLine("");
+        //}
+
+        //internal static FlickrAlbumData CreateAlbumAndAddPictures(List<string> photoIDList, string albumName)
+        //{
+        //    FlickrAlbumData fad = null;
+        //    try
+        //    {
+        //        if (photoIDList.Count > 0)
+        //        {
+        //            Photoset ps = flickr.PhotosetsCreate(albumName, photoIDList[0]);
+        //            fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+        //            foreach (String photoID in photoIDList)
+        //            {
+        //                if (photoID != photoIDList[0])
+        //                    flickr.PhotosetsAddPhoto(ps.PhotosetId, photoID);
+        //                Console.Write(".");
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Exception: " + ex.ToString());
+        //        throw ex;
+        //    }
+        //    Console.WriteLine("");
+        //    return fad;
+        //}
+
+        internal static void UploadImagesToAlbum(List<string> fileNames, string folder, string albumId)
         {
             List<String> photoIdList = new List<string>();
             foreach (String filename in fileNames)
             {
-                FileStream fs = new FileStream(folder + "\\" + filename, FileMode.Open, FileAccess.Read);
-                var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
-                threadFinishEvents.Add(threadFinish);
-
-                flickr.UploadPictureAsync(fs, filename, filename, "", "", false, false, false, ContentType.Photo, SafetyLevel.Safe, HiddenFromSearch.None, r1 =>
+                try
+                {
+                    Console.Write(photoIdList.Count + 1 + "/" + fileNames.Count + ") Upload:" + filename + " Album:" + folder);
+                    String photoId = UploadImage(filename, folder);
+                    Console.WriteLine(" Id=" + photoId + " Completed");
+                    if (photoId != null)
                     {
-                        FlickrResult<string> result = r1;
-                        if (result.HasError == false)
+                        photoIdList.Add(photoId);
+                        flickr.PhotosetsAddPhoto(albumId, photoId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception:" + ex.ToString());
+                }
+
+            }
+            return;
+
+        }
+        internal static FlickrAlbumData CreateAlbumAndUploadImages(List<string> fileNames, string folder, string albumName)
+        {
+            FlickrAlbumData fad = null;
+            List<String> photoIdList = new List<string>();
+            if (fileNames.Count > 0)
+            {
+                foreach (String fileName in fileNames)
+                {
+                    try
+                    {
+                        Console.Write(photoIdList.Count + 1 + "/" + fileNames.Count + ") Upload:" + fileName + " Album:" + folder);
+                        String photoId = UploadImage(fileName, folder);
+                        if (fad == null && photoId != null)
                         {
-                            String photoId = result.Result;
-                            if (photoId != null)
-                                photoIdList.Add(photoId);
+                            Photoset ps = flickr.PhotosetsCreate(albumName, photoId);
+                            fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
                         }
                         else
                         {
-                            Console.WriteLine("Error uploading " + filename + " Album:" + folder);
+                            flickr.PhotosetsAddPhoto(fad.AlbumId, photoId);
                         }
-                        threadFinish.Set();
-                    });
-                if (threadFinishEvents.Count > 3)
-                {
-                    Mutex.WaitAll(threadFinishEvents.ToArray(), 150000);
-                    threadFinishEvents.Clear();
-                }
-
-            }
-            WaitForAllThreads();
-            return photoIdList;
-        }
-
-
-        internal static void AddImagesToAlbum(List<string> photoIDList, string albumId)
-        {
-            foreach (String photoID in photoIDList)
-            {
-                Console.Write(".");
-                flickr.PhotosetsAddPhoto(albumId, photoID);
-            }
-            Console.WriteLine("");
-        }
-
-        internal static FlickrAlbumData CreateAlbumAndAddPictures(List<string> photoIDList, string albumName)
-        {
-            FlickrAlbumData fad = null;
-            try
-            {
-                if (photoIDList.Count > 0)
-                {
-                    Photoset ps = flickr.PhotosetsCreate(albumName, photoIDList[0]);
-                    fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
-                    foreach (String photoID in photoIDList)
-                    {
-                        Console.Write(".");
-                        if (photoID != photoIDList[0])
-                            flickr.PhotosetsAddPhoto(ps.PhotosetId, photoID);
+                        if (photoId != null)
+                            photoIdList.Add(photoId);
                     }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Exception:" + ex.ToString());
+                    }
+
+
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex.ToString());
-                throw ex;
-            }
-            Console.WriteLine("");
             return fad;
+        }
+
+        public static String UploadImage(string fileName, string folder)
+        {
+            FileStream fs = new FileStream(folder + "\\" + fileName, FileMode.Open, FileAccess.Read);
+            flickr.HttpTimeout = 1000000;
+            String photoId = flickr.UploadPicture(fs, fileName, fileName, "", "", false, false, false, ContentType.Photo, SafetyLevel.Safe, HiddenFromSearch.None);
+            return photoId;
         }
     }
 }

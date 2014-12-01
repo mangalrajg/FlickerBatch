@@ -106,29 +106,7 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
-        #region UploadCommand
-        //private ICommand _UploadCommand;
-        //public ICommand UploadCommand
-        //{
-        //    get
-        //    {
-        //        if (_UploadCommand == null)
-        //        {
-        //            _UploadCommand = new GenericCommand(param => this.SetUploadViewModel(param), null);
-        //        }
-        //        return _UploadCommand;
-        //    }
-        //}
-
-        //private object SetUploadViewModel(object param)
-        //{
-        //    (param as Grid).Children.Clear();
-        //    (param as Grid).Children.Add(new AlbumRenameView());
-        //    (param as Grid).DataContext = new AlbumRenameViewModel();
-        //    return null;
-        //}
-        #endregion
-
+ 
         #region ConfigureCommand
         private ICommand _ConfigureCommand;
         public ICommand ConfigureCommand
@@ -152,6 +130,51 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
+        #region LoadLocalImageDataCommand
+        private ICommand _LoadLocalImageDataCommand;
+        public ICommand LoadLocalImageDataCommand
+        {
+            get
+            {
+                if (_LoadLocalImageDataCommand == null)
+                {
+                    _LoadLocalImageDataCommand = new GenericCommand(param => this.SetLoadLocalImageDataViewModel(param), null);
+                }
+                return _LoadLocalImageDataCommand;
+            }
+        }
+
+        private object SetLoadLocalImageDataViewModel(object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new LoadLocalImageDataView());
+            (param as Grid).DataContext = new LoadLocalImageDataViewModel();
+            return null;
+        }
+        #endregion
+
+        #region LoadRemoteImageDataCommand
+        private ICommand _LoadRemoteImageDataCommand;
+        public ICommand LoadRemoteImageDataCommand
+        {
+            get
+            {
+                if (_LoadRemoteImageDataCommand == null)
+                {
+                    _LoadRemoteImageDataCommand = new GenericCommand(param => this.SetLoadRemoteImageDataViewModel(param), null);
+                }
+                return _LoadRemoteImageDataCommand;
+            }
+        }
+
+        private object SetLoadRemoteImageDataViewModel(object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new LoadRemoteImageDataView());
+            (param as Grid).DataContext = new LoadRemoteImageDataViewModel();
+            return null;
+        }
+        #endregion
 
         public MainWindowViewModel()
         {
