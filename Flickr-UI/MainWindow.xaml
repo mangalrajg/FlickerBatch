@@ -32,7 +32,7 @@
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>
-        <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" >
+        <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" DataContext="{Binding StatusBarContext}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -49,13 +49,13 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem BorderThickness="1" Margin="0,-3,0,-2">
-                <TextBlock x:Name="statusBarText">www.247moneymakingschemes.blogspot.com</TextBlock>
+                <TextBlock x:Name="statusBarText" Text="{Binding StatusText}"/>
             </StatusBarItem>
             <StatusBarItem Grid.Column="1">
-                <ProgressBar Value="30" Width="80" Height="18" />
+                <ProgressBar Value="{Binding ProgressValue}" Width="80" Height="18" />
             </StatusBarItem>
             <StatusBarItem Grid.Column="3">
-                <TextBlock>Go!</TextBlock>
+                <TextBlock Text="{Binding CurrentJob}"/>
             </StatusBarItem>
         </StatusBar>
 

@@ -25,6 +25,11 @@ namespace baseLibrary.Model
                     GenericHelper.StringSQLite(Album), PhotoId, 'N', GenericHelper.DateTimeSQLite(DateTime.Now));
             }
         }
+        public override string DeleteSQL
+        {
+            get { return String.Format("DELETE From {0} where ID='{1}' ", TableNames.REMOTE_DATA, PhotoId); }
+        }
+
         public String Album { get; set; }
         public String PhotoId { get; set; }
         public RemoteImageData(String album, String photoId, String title, DateTime dateTaken, String desc)

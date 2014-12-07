@@ -20,23 +20,23 @@ namespace baseLibrary.DBInterface
         private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
         #region Static SQLs
-        private static String _loadLocalDuplicatesSQL = @"select  path src,path2 dest, count(1) numPics from 
-                                                        (select l1.filename, l1.date_taken, l1.path path, l2.path path2, l1.size from local_data l1, local_data l2 where
+        private static String _loadLocalDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
+                                                        (select l1.filename, l1.date_taken, l1.album album, l2.album path2, l1.id from local_data l1, local_data l2 where
                                                         l1.filename = l2.filename and
                                                         l1.date_taken = l2.date_taken and
-                                                        l1.size = l2.size and 
-                                                        l1.path != l2.path
+                                                        l1.id = l2.id and 
+                                                        l1.album != l2.album
                                                         order by l1.filename desc)
-                                                    group by path,path2;";
-        private static String _loadRemoteDuplicatesSQL = @"select  path src,path2 dest, count(1) numPics from 
-                                                        (select l1.TITLE, l1.date_taken, l1.ALBUM path, l2.ALBUM path2, l1.id from remote_data l1, remote_data l2 where
+                                                    group by album,path2;";
+        private static String _loadRemoteDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
+                                                        (select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.id from remote_data l1, remote_data l2 where
                                                         l1.TITLE = l2.TITLE and
                                                         l1.date_taken = l2.date_taken and
                                                         l1.ALBUM != l2.ALBUM
                                                         order by l1.ALBUM desc)
-                                                    group by path,path2;";
+                                                    group by album,path2;";
 
-        private static String _loadRemoteDuplicateImagesSQL = @"select l1.TITLE, l1.date_taken, l1.ALBUM path, l2.ALBUM path2, l1.ID from remote_data l1, remote_data l2 where
+        private static String _loadRemoteDuplicateImagesSQL = @"select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.ID from remote_data l1, remote_data l2 where
                                                         l1.TITLE = l2.TITLE and
                                                         l1.date_taken = l2.date_taken and
                                                         l1.ALBUM != l2.ALBUM and
@@ -44,13 +44,13 @@ namespace baseLibrary.DBInterface
                                                         l2.ALBUM = '{1}'
                                                         order by l1.TITLE desc;";
 
-        private static String _loadLocalDuplicateImagesSQL = @"select l1.filename, l1.date_taken, l1.path path, l2.path path2, l1.size from local_data l1, local_data l2 where
+        private static String _loadLocalDuplicateImagesSQL = @"select l1.filename, l1.date_taken, l1.album album, l2.album path2, l1.id from local_data l1, local_data l2 where
                                                         l1.filename = l2.filename and
                                                         l1.date_taken = l2.date_taken and
-                                                        l1.size = l2.size and 
-                                                        l1.path != l2.path and
-                                                        l1.path = '{0}' and
-                                                        l2.path = '{1}'
+                                                        l1.id = l2.id and 
+                                                        l1.album != l2.album and
+                                                        l1.album = '{0}' and
+                                                        l2.album = '{1}'
                                                         order by l1.filename desc;";
 
         private static String _createTable = "CREATE TABLE if not exists ";
@@ -371,11 +371,7 @@ namespace baseLibrary.DBInterface
 
         public static List<GenericAlbumData> LoadAlbumsToUpload()
         {
-            String sql = @"SELECT PATH, count(1) COUNT FROM LOCAL_DATA  WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (
-            SELECT UPPER(TITLE||'.jpg'|| DATE_TAKEN) FROM REMOTE_DATA 
-            UNION
-            SELECT UPPER(TITLE|| DATE_TAKEN) FROM REMOTE_DATA 
-            ) group by PATH;";
+            String sql = @"SELECT PATH, COUNT(1) COUNT FROM LOCAL_DATA  WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (SELECT UPPER(TITLE|| DATE_TAKEN) FROM REMOTE_DATA ) AND DATE_TAKEN != 20000101000000 ORDER BY COUNT(1) group by PATH;";
             return _LoadLocalAlbums(sql);
         }
         public static List<GenericAlbumData> LoadLocalAlbums()
@@ -393,10 +389,7 @@ namespace baseLibrary.DBInterface
 
         public static List<LocalImageData> LoadImagesToUpload(String path)
         {
-            String sql = String.Format("SELECT * FROM " + TableNames.LOCAL_DATA + @" WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (
-            SELECT UPPER(TITLE||'.jpg'|| DATE_TAKEN) FROM " + TableNames.REMOTE_DATA + @"
-            UNION
-            SELECT UPPER(TITLE|| DATE_TAKEN) FROM " + TableNames.REMOTE_DATA +") AND PATH='{0}';",GenericHelper.StringSQLite(path));
+            String sql = String.Format(@"SELECT * FROM LOCAL_DATA WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (SELECT UPPER(TITLE|| DATE_TAKEN) FROM REMOTE_DATA ) AND PATH='{0}' AND DATE_TAKEN != 20000101000000 ;", GenericHelper.StringSQLite(path));
             return _LoadLocalImageData(sql);
         }
         public static List<LocalImageData> LoadLocalImageData(string baseDir)
@@ -532,10 +525,39 @@ namespace baseLibrary.DBInterface
 
         public static void DeleteAllRemoteImageData()
         {
-            Console.WriteLine("Delete Table: " + TableNames.REMOTE_DATA+ " from database");
+            Console.WriteLine("Delete Table: " + TableNames.REMOTE_DATA + " from database");
             ExecuteNonQuery(String.Format("DELETE from REMOTE_DATA ;"));
         }
 
+        private static List<RemoteImageData> _LoadRemoteImageData(String sql)
+        {
+            List<RemoteImageData> remoteImageList = new List<RemoteImageData>();
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+
+                    mycommand.CommandText = sql;
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String fileName = (String)reader["TITLE"];
+                        String date_taken = (String)reader["DATE_TAKEN"];
+                        String description = (String)reader["DESCRIPTION"];
+                        String id = (String)reader["ID"];
+                        String sync_date = (String)reader["SYNC_DATE"];
+                        String album = (String)reader["ALBUM"];
+                        remoteImageList.Add(new RemoteImageData(album, id, fileName, GenericHelper.DateTimeSQLite(date_taken), description));
+                    }
+
+                }
+                cnn.Close();
+            }
+            return remoteImageList;
+        }
         private static List<LocalImageData> _LoadLocalImageData(String sql)
         {
             List<LocalImageData> localImageList = new List<LocalImageData>();
@@ -593,6 +615,41 @@ namespace baseLibrary.DBInterface
 
         }
 
+
+        public static List<RemoteImageData> LoadFilesWithoutExtention(String albumName)
+        {
+            String sql = String.Format(@"select * from REMOTE_DATA r where album='{0}' and title not like '%.%' and (substr(title, 0,4)='IMG' or substr(title, 0,4)='P10' or substr(title, 0,4)='DSC' or substr(title, 0,4)='Pic' or substr(title, 0,4)='100' or substr(title, 0,4)='Ima' or substr(title, 0,4)='SA4' or substr(title, 0,4)='Del'  or substr(title, 0,4)='_DS')
+order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
+            return _LoadRemoteImageData(sql);
+
+
+
+        }
+
+        public static void DeleteRemoteImageData(List<RemoteImageData> rlist)
+        {
+        }
+
+        public static List<GenericAlbumData> AlbomsWithFilesWithoutExtention()
+        {
+            String sql = @"select album PATH,count(1) COUNT from remOTE_DATA r where title not like '%.%' and (substr(title, 0,4)='IMG' or substr(title, 0,4)='P10' or substr(title, 0,4)='DSC' or substr(title, 0,4)='Pic' or substr(title, 0,4)='100' or substr(title, 0,4)='Ima' or substr(title, 0,4)='SA4' or substr(title, 0,4)='Del'  or substr(title, 0,4)='_DS')
+group by album;";
+            return _LoadLocalAlbums(sql);
+        }
+
+        public static List<RemoteImageData> LoadImagesToFixDate()
+        {
+            String sql = @"select * from REMOTE_DATA where date_taken > '20141101000000' order by date_taken";
+            return _LoadRemoteImageData(sql);
+        }
+
+        public static void DeleteImageData(List<BaseImageData> rlist)
+        {
+            foreach(BaseImageData rid in rlist)
+            {
+                ExecuteNonQuery(rid.DeleteSQL);
+            }
+        }
     }
 
 }

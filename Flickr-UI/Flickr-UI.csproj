@@ -62,6 +62,7 @@
     <Compile Include="ViewModel\FindImagesToUploadViewModel.cs" />
     <Compile Include="ViewModel\LoadLocalImageDataViewModel.cs" />
     <Compile Include="ViewModel\LoadRemoteImageDataViewModel.cs" />
+    <Compile Include="ViewModel\StatusBarViewModel.cs" />
     <Compile Include="Views\AlbumRenameView.xaml.cs">
       <DependentUpon>AlbumRenameView.xaml</DependentUpon>
     </Compile>

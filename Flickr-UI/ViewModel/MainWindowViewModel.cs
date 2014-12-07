@@ -13,6 +13,16 @@ namespace Flickr_UI.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
+        private StatusBarViewModel _StatusBarContext;
+        public StatusBarViewModel StatusBarContext
+        {
+            get { return _StatusBarContext; }
+            set
+            {
+                _StatusBarContext = value;
+                NotifyPropertyChanged("StatusBarContext");
+            }
+        }
         #region DuplicateLocalImageMoverCommand
         private ICommand _DuplicateLocalImageMoverCommand;
         public ICommand DuplicateLocalImageMoverCommand
@@ -77,7 +87,10 @@ namespace Flickr_UI.ViewModel
         {
             (param as Grid).Children.Clear();
             (param as Grid).Children.Add(new FindImagesToUploadView());
-            (param as Grid).DataContext = new FindImagesToUploadViewModel();
+            FindImagesToUploadViewModel vm = new FindImagesToUploadViewModel();
+            vm.SetStatusBarViewModel(StatusBarContext);
+            (param as Grid).DataContext = vm;
+
             return null;
         }
         #endregion
@@ -106,7 +119,7 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
- 
+
         #region ConfigureCommand
         private ICommand _ConfigureCommand;
         public ICommand ConfigureCommand
@@ -178,6 +191,14 @@ namespace Flickr_UI.ViewModel
 
         public MainWindowViewModel()
         {
+            StatusBarContext = new StatusBarViewModel();
+            StatusBarContext.PropertyChanged += StatusBarContext_PropertyChanged;
+            
+        }
+
+        void StatusBarContext_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            NotifyPropertyChanged("StatusBarContext");
         }
         //Whenever new item is added to the collection, am explicitly calling notify property changed
     }

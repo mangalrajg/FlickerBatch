@@ -30,6 +30,7 @@ namespace Flickr_UI.ViewModel
             }
         }
 
+        private StatusBarViewModel _StatusBarContext;
         private ObservableCollection<LocalAlbumUploadData> _ImagesToUploadCollection;
         public ObservableCollection<LocalAlbumUploadData> ImagesToUploadCollection
         {
@@ -91,21 +92,32 @@ namespace Flickr_UI.ViewModel
 
         public void UploadImage(Object sender)
         {
+            int count = 0;
             List<LocalAlbumUploadData> selectedItems = (sender as List<LocalAlbumUploadData>);
             foreach (LocalAlbumUploadData lad in selectedItems)
             {
                 String albumName = lad.Name;
-                List<String> fileNames = new List<string>();
+                List<LocalImageData> imagesToUpload = new List<LocalImageData>();
                 foreach (LocalImageData lid in lad.ImageDetails)
                 {
-                    fileNames.Add(lid.Name);
+                    imagesToUpload.Add(lid);
                 }
-                Console.WriteLine("Upload Album: " + albumName + " Count=" + fileNames.Count);
-                FlickerCache.UploadImages(fileNames, albumName);
+                Console.WriteLine("Upload Album: " + albumName + " Count=" + imagesToUpload.Count);
+                _StatusBarContext.CurrentJob = albumName;
+                _StatusBarContext.ProgressValue = (count*100 / selectedItems.Count);
+                _StatusBarContext.StatusText = "Uploading " + count + "/" + selectedItems.Count;
+                FlickerCache.UploadImages(imagesToUpload, albumName);
                 Console.WriteLine("Save Images of Album :" + albumName);
                 FlickerCache.SaveRemoteAlbum(albumName);
+                count++;
+
             }
 
+        }
+
+        internal void SetStatusBarViewModel(StatusBarViewModel StatusBarContext)
+        {
+            _StatusBarContext = StatusBarContext;
         }
     }
 }

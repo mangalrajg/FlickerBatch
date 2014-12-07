@@ -25,7 +25,7 @@ namespace Flickr_UI
             set
             {
                 _AddPrefix = value;
-                NotifyPropertyChanged("AddPrefix");
+                NotifyPropertyChanged("StatusText");
             }
         }
 
