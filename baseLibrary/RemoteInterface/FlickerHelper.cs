@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace baseLibrary.RemoteInterface
@@ -63,7 +64,7 @@ namespace baseLibrary.RemoteInterface
             PhotosetCollection psc = flickr.PhotosetsGetList();
             foreach (Photoset ps in psc)
             {
-                FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos + ps.NumberOfVideos, ps.Description, DateTime.Now);
                 retPs.Add(fad);
             }
             return retPs;
@@ -133,16 +134,12 @@ namespace baseLibrary.RemoteInterface
                 while (ps.NumberOfPhotos > numPage * 500)
                 {
                     numPage++;
-                    Console.WriteLine("Loading Album Info: " + ps.Name + "  Page:" + numPage);
-                    PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.All, numPage, 500);
+                    Console.WriteLine("Loading Album Info: " + ps.Name + "  Page:" + numPage + " NumberOfPhotos: " + ps.NumberOfPhotos);
+                    PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.DateTaken, numPage, 500);
                     foreach (Photo p in ppc)
                     {
-                        DateTime date_taken = p.DateTaken;
-                        if (p.DateTaken > DateTime.Today)
-                        {
-                            date_taken = new DateTime(2000, 1, 1);
-                        }
-                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, date_taken, p.Description);
+                        //Console.WriteLine("Test");
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
                         allPics.Add(rid);
                     }
                 }
@@ -206,49 +203,90 @@ namespace baseLibrary.RemoteInterface
 
         }
 
-        internal static void MovePictures(string[] photoIDList, string oldAblumId, string newAlbumId)
+        internal static void MovePictures(string[] fullPhotoIDList, string oldAblumId, string newAlbumId)
         {
-            try
+            int i = 0;
+            while (fullPhotoIDList.Length > i * 300)
             {
-                flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
-                foreach (String photoID in photoIDList)
-                {
-                    Console.Write(".");
-                    flickr.PhotosetsAddPhoto(newAlbumId, photoID);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex.ToString());
-                throw ex;
-            }
-            Console.WriteLine("");
-        }
+                List<String> retPhotoId = new List<string>();
+                int endLen = 300;
+                if (endLen > fullPhotoIDList.Length - i * 300)
+                    endLen = fullPhotoIDList.Length - i * 300;
 
-        internal static FlickrAlbumData CreateAlbumAndMovePictures(string[] photoIDList, string oldAblumId, string newAlbumName)
-        {
-            FlickrAlbumData fad = null;
-            try
-            {
-                flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
-                if (photoIDList.Length > 0)
+                string[] photoIDList = new string[endLen];
+                Array.Copy(fullPhotoIDList, i * 300, photoIDList, 0, endLen);
+                i++;
+                try
                 {
-                    Photoset ps = flickr.PhotosetsCreate(newAlbumName, photoIDList[0]);
-                    fad = new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                    flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
                     foreach (String photoID in photoIDList)
                     {
-                        Console.Write(".");
-                        if (photoID != photoIDList[0])
-                            flickr.PhotosetsAddPhoto(ps.PhotosetId, photoID);
+                        flickr.PhotosetsAddPhotoAsync(newAlbumId, photoID, delegate
+                        {
+                            retPhotoId.Add(photoID);
+                            Console.WriteLine("photoID:" + photoID + "Album: " + newAlbumId);
+                        });
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: " + ex.ToString());
+                    throw ex;
+                }
+                Console.WriteLine("");
+                while (retPhotoId.Count <= photoIDList.Length - 10)
+                {
+                    Console.WriteLine("Status: " + retPhotoId.Count + "/" + photoIDList.Length);
+                    Thread.Sleep(1000);
+                }
             }
-            catch (Exception ex)
+        }
+
+        internal static FlickrAlbumData CreateAlbumAndMovePictures(string[] fullPhotoIDList, string oldAblumId, string newAlbumName)
+        {
+            FlickrAlbumData fad = null;
+            int i = 0;
+            while (fullPhotoIDList.Length > i * 300)
             {
-                Console.WriteLine("Exception: " + ex.ToString());
-                throw ex;
+                List<String> retPhotoId = new List<string>();
+                int endLen = 300;
+                if (endLen > fullPhotoIDList.Length - i * 300)
+                    endLen = fullPhotoIDList.Length - i * 300;
+
+                string[] photoIDList = new string[endLen];
+                Array.Copy(fullPhotoIDList, i * 300, photoIDList, 0, endLen);
+                i++;
+                try
+                {
+                    flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
+                    if (photoIDList.Length > 0)
+                    {
+                        Photoset ps = flickr.PhotosetsCreate(newAlbumName, photoIDList[0]);
+                        fad = new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                        foreach (String photoID in photoIDList)
+                        {
+
+                            if (photoID != photoIDList[0])
+                                flickr.PhotosetsAddPhotoAsync(ps.PhotosetId, photoID, delegate
+                                {
+                                    retPhotoId.Add(photoID);
+                                    Console.WriteLine("photoID:" + photoID + "Album: " + newAlbumName);
+                                });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: " + ex.ToString());
+                    throw ex;
+                }
+                Console.WriteLine("");
+                while (retPhotoId.Count <= photoIDList.Length - 10)
+                {
+                    Console.WriteLine("Status: " + retPhotoId.Count + "/" + photoIDList.Length);
+                    Thread.Sleep(1000);
+                }
             }
-            Console.WriteLine("");
             return fad;
         }
 
@@ -418,12 +456,13 @@ namespace baseLibrary.RemoteInterface
         {
             foreach (RemoteImageData rid in rlist)
             {
+                rid.DateTaken = _DefaultDateTaken;
                 Console.WriteLine("Fixing: " + rid.Name + "\t Album: " + rid.Album);
                 flickr.PhotosSetDates(rid.PhotoId, _DefaultDateTaken, DateGranularity.FullDate);
             }
             DatabaseHelper.DeleteImageData(rlist.ConvertAll<BaseImageData>(new Converter<RemoteImageData, BaseImageData>(RemoteImageData2BaseImageData)));
-            DatabaseHelper.SaveImageData(rlist.ConvertAll<BaseImageData>(new Converter<RemoteImageData,BaseImageData>(RemoteImageData2BaseImageData)));
-            
+            DatabaseHelper.SaveImageData(rlist.ConvertAll<BaseImageData>(new Converter<RemoteImageData, BaseImageData>(RemoteImageData2BaseImageData)));
+
 
         }
         public static BaseImageData RemoteImageData2BaseImageData(RemoteImageData pf)

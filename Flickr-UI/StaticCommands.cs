@@ -88,5 +88,14 @@ namespace Flickr_UI
             }
         }
 
+        private static readonly RoutedUICommand _SyncCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand SyncCommand
+        {
+            get
+            {
+                return _SyncCommand;
+            }
+        }
+
     }
 }

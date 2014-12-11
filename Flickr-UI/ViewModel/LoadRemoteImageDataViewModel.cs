@@ -113,6 +113,14 @@ namespace Flickr_UI.ViewModel
             {
                 DatabaseHelper.DeleteRemoteImageData(fad.Name);
                 List<BaseImageData> imageList = FlickerHelper.LoadRemotePicturesData(fad);
+                if(imageList.Count != fad.NumberOfPhotos)
+                {
+                    Console.WriteLine("===========================");
+                    Console.WriteLine("\tAlbum   =:" + fad.Name);
+                    Console.WriteLine("\tExpected=:" + fad.NumberOfPhotos);
+                    Console.WriteLine("\tActual  =:" + imageList.Count);
+
+                }
                 DatabaseHelper.SaveImageData(imageList);
             }
         }

@@ -15,7 +15,7 @@ namespace baseLibrary.Generic
         }
         public static string StringSQLite(String str)
         {
-            return str.Replace("'", "''");
+            return str == null ? null: str.Replace("'", "''");
         }
         public static DateTime DateTimeSQLite(String datetime)
         {

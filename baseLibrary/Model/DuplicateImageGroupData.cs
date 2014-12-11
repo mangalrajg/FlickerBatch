@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Flickr_UI
 {
-    public enum Mode { REMOTE, LOCAL };
+    public enum Mode { REMOTE, LOCAL, MIXED };
     public class DuplicateImageGroupData
     {
         private Mode _mode = Mode.LOCAL;
@@ -25,9 +25,13 @@ namespace Flickr_UI
                     {
                         _imageDetails = DatabaseHelper.LoadRemoteDuplicateImages(SourcePath, DestinationPath);
                     }
-                    else
+                    else if (_mode == Mode.LOCAL)
                     {
                         _imageDetails = DatabaseHelper.LoadLocalDuplicateImages(SourcePath, DestinationPath);
+                    }
+                    else if (_mode == Mode.MIXED)
+                    {
+                        _imageDetails = DatabaseHelper.LoadImagesToSyncronise(SourcePath, DestinationPath);
                     }
                 }
                 return _imageDetails;

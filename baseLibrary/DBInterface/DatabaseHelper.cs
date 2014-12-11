@@ -147,110 +147,21 @@ namespace baseLibrary.DBInterface
 
         public static List<DuplicateImageGroupData> LoadRemoteDuplicateImageData()
         {
-            List<DuplicateImageGroupData> duplicateImgList = new List<DuplicateImageGroupData>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
-            using (DbConnection cnn = fact.CreateConnection())
-            {
-                cnn.ConnectionString = connectionString;
-                cnn.Open();
-                using (DbCommand mycommand = cnn.CreateCommand())
-                {
-
-                    mycommand.CommandText = _loadRemoteDuplicatesSQL;
-                    DbDataReader reader = mycommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        String src = reader.GetString(0);
-                        String dest = reader.GetString(1);
-                        Int64 count = reader.GetInt64(2);
-                        duplicateImgList.Add(new DuplicateImageGroupData(src, dest, Convert.ToInt32(count), Mode.REMOTE));
-                    }
-
-                }
-                cnn.Close();
-            }
-            return duplicateImgList;
+            return _LoadDuplicateImageGroupData(_loadRemoteDuplicatesSQL, Mode.REMOTE);
         }
         public static List<DuplicateImageGroupData> LoadLocalDuplicateImageData()
         {
-            List<DuplicateImageGroupData> duplicateImgList = new List<DuplicateImageGroupData>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
-            using (DbConnection cnn = fact.CreateConnection())
-            {
-                cnn.ConnectionString = connectionString;
-                cnn.Open();
-                using (DbCommand mycommand = cnn.CreateCommand())
-                {
-
-                    mycommand.CommandText = _loadLocalDuplicatesSQL;
-                    DbDataReader reader = mycommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        String src = reader.GetString(0);
-                        String dest = reader.GetString(1);
-                        Int64 count = reader.GetInt64(2);
-                        duplicateImgList.Add(new DuplicateImageGroupData(src, dest, Convert.ToInt32(count), Mode.LOCAL));
-                    }
-
-                }
-                cnn.Close();
-            }
-            return duplicateImgList;
+            return _LoadDuplicateImageGroupData(_loadLocalDuplicatesSQL, Mode.LOCAL);
         }
         public static List<DuplicateImageData> LoadLocalDuplicateImages(string SourcePath, string DestinationPath)
         {
-            List<DuplicateImageData> duplicateImgList = new List<DuplicateImageData>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
-            using (DbConnection cnn = fact.CreateConnection())
-            {
-                cnn.ConnectionString = connectionString;
-                cnn.Open();
-                using (DbCommand mycommand = cnn.CreateCommand())
-                {
-
-                    mycommand.CommandText = String.Format(_loadLocalDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
-
-                    DbDataReader reader = mycommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        String filename = reader.GetString(0);
-                        String date_taken = reader.GetString(1);
-                        String src = reader.GetString(2);
-                        String dest = reader.GetString(3);
-                        duplicateImgList.Add(new DuplicateImageData(filename, date_taken, src, dest));
-                    }
-                }
-                cnn.Close();
-            }
-            return duplicateImgList;
+            String sql = String.Format(_loadLocalDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
+            return _LoadDuplicateImages(sql);
         }
         public static List<DuplicateImageData> LoadRemoteDuplicateImages(string SourcePath, string DestinationPath)
         {
-            List<DuplicateImageData> duplicateImgList = new List<DuplicateImageData>();
-            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
-            using (DbConnection cnn = fact.CreateConnection())
-            {
-                cnn.ConnectionString = connectionString;
-                cnn.Open();
-                using (DbCommand mycommand = cnn.CreateCommand())
-                {
-
-                    mycommand.CommandText = String.Format(_loadRemoteDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
-
-                    DbDataReader reader = mycommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        String filename = reader.GetString(0);
-                        String date_taken = reader.GetString(1);
-                        String src = reader.GetString(2);
-                        String dest = reader.GetString(3);
-                        duplicateImgList.Add(new DuplicateImageData(filename, date_taken, src, dest));
-                    }
-
-                }
-                cnn.Close();
-            }
-            return duplicateImgList;
+            String sql = String.Format(_loadRemoteDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
+            return _LoadDuplicateImages(sql);
         }
 
         #region Flicker Albums table
@@ -371,7 +282,7 @@ namespace baseLibrary.DBInterface
 
         public static List<GenericAlbumData> LoadAlbumsToUpload()
         {
-            String sql = @"SELECT PATH, COUNT(1) COUNT FROM LOCAL_DATA  WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (SELECT UPPER(TITLE|| DATE_TAKEN) FROM REMOTE_DATA ) AND DATE_TAKEN != 20000101000000 ORDER BY COUNT(1) group by PATH;";
+            String sql = @"SELECT PATH, COUNT(1) COUNT FROM LOCAL_DATA  WHERE UPPER(FILENAME|| DATE_TAKEN) NOT IN (SELECT UPPER(TITLE|| DATE_TAKEN) FROM REMOTE_DATA ) AND DATE_TAKEN != 20000101000000 group by PATH ORDER BY COUNT(1) ;";
             return _LoadLocalAlbums(sql);
         }
         public static List<GenericAlbumData> LoadLocalAlbums()
@@ -614,6 +525,59 @@ namespace baseLibrary.DBInterface
             return localImageList;
 
         }
+        public static List<DuplicateImageGroupData> _LoadDuplicateImageGroupData(String sql, Mode mode)
+        {
+            List<DuplicateImageGroupData> duplicateImgList = new List<DuplicateImageGroupData>();
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+
+                    mycommand.CommandText = sql;
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String src = reader.GetString(0);
+                        String dest = reader.GetString(1);
+                        Int64 count = reader.GetInt64(2);
+                        duplicateImgList.Add(new DuplicateImageGroupData(src, dest, Convert.ToInt32(count), mode));
+                    }
+
+                }
+                cnn.Close();
+            }
+            return duplicateImgList;
+        }
+        public static List<DuplicateImageData> _LoadDuplicateImages(String sql)
+        {
+            List<DuplicateImageData> duplicateImgList = new List<DuplicateImageData>();
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+
+                    mycommand.CommandText = sql;
+
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String filename = reader.GetString(0);
+                        String date_taken = reader.GetString(1);
+                        String src = reader.GetString(2);
+                        String dest = reader.GetString(3);
+                        duplicateImgList.Add(new DuplicateImageData(filename, date_taken, src, dest));
+                    }
+                }
+                cnn.Close();
+            }
+            return duplicateImgList;
+        }
 
 
         public static List<RemoteImageData> LoadFilesWithoutExtention(String albumName)
@@ -645,10 +609,37 @@ group by album;";
 
         public static void DeleteImageData(List<BaseImageData> rlist)
         {
-            foreach(BaseImageData rid in rlist)
+            foreach (BaseImageData rid in rlist)
             {
                 ExecuteNonQuery(rid.DeleteSQL);
             }
+        }
+
+        public static List<DuplicateImageData>  LoadImagesToSyncronise(String sourcePath, String destinationPath)
+        {
+            //TODO
+            String sql = @"
+                        select rd.title,rd.date_taken, rd.album, ld.path from local_DATA ld, remoTE_DATA rd
+                        where
+                        upper(ld.filename) = upper(rd.title) and
+                        ld.date_taken = rd.date_taken and
+                        ld.path != rd.album and
+                        rd.album = '{0}' and
+                        ld.path = '{1}' and
+                        ld.date_taken != '20000101000000';";
+            return _LoadDuplicateImages(string.Format(sql,GenericHelper.StringSQLite(sourcePath), GenericHelper.StringSQLite(destinationPath)));
+        }
+        public static List<DuplicateImageGroupData> LoadImageGroupsToSyncronise()
+        {
+            String sql = @"
+                        select rd.album, ld.path, count(1) from local_DATA ld, remoTE_DATA rd
+                        where
+                        upper(ld.filename) = upper(rd.title) and
+                        ld.date_taken = rd.date_taken and
+                        ld.path != rd.album
+                        and ld.date_taken != '20000101000000'
+                        group by rd.album, ld.path;";
+            return _LoadDuplicateImageGroupData(sql, Mode.MIXED);
         }
     }
 

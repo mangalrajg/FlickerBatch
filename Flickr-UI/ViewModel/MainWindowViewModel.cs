@@ -96,6 +96,33 @@ namespace Flickr_UI.ViewModel
         #endregion
 
 
+        #region SyncCommand
+        private ICommand _SyncCommand;
+        public ICommand SyncCommand
+        {
+            get
+            {
+                if (_SyncCommand == null)
+                {
+                    _SyncCommand = new GenericCommand(param => this.SetFindImagesToSyncViewModel(param), null);
+                }
+                return _SyncCommand;
+            }
+        }
+
+        private object SetFindImagesToSyncViewModel(object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new FindImagesToSyncView());
+            FindImagesToSyncViewModel vm = new FindImagesToSyncViewModel();
+            vm.SetStatusBarViewModel(StatusBarContext);
+            (param as Grid).DataContext = vm;
+
+            return null;
+        }
+        #endregion
+
+
         #region AlbumRenameCommand
         private ICommand _AlbumRenameCommand;
         public ICommand AlbumRenameCommand
