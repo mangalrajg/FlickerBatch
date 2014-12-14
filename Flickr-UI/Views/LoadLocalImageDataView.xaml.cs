@@ -32,5 +32,26 @@ namespace Flickr_UI.Views
                 MainGrid.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
         }
 
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
+
+
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            System.Windows.Forms.DialogResult result = dlg.ShowDialog();
+
+            
+            // Get the selected file name and display in a TextBox 
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                // Open document 
+                string filename = dlg.SelectedPath;
+                textBox1.Text = filename;
+            }
+        }
+
+
     }
 }

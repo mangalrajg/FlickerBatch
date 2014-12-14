@@ -21,7 +21,8 @@
         </Grid.RowDefinitions>
         <Button Grid.Row="1" Grid.Column="1" Content="Move" Command="local:StaticCommands.MoveImagesLocalCommand" CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=DataContext}"/>
 
-        <DataGrid Grid.Row="2" Grid.ColumnSpan="4" ItemsSource="{Binding DuplicateImageCollection}" AutoGenerateColumns="False" SelectionMode="Extended" Name="MainGrid" SelectedItem="{Binding SelectedItem}">
+        <DataGrid Grid.Row="2" Grid.ColumnSpan="4" ItemsSource="{Binding DuplicateImageCollection}" AutoGenerateColumns="False" SelectionMode="Extended" Name="MainGrid" 
+                  SelectedItem="{Binding SelectedItem}" IsReadOnly="True" MouseDown="MainGrid_MouseDown" >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Source" Binding="{Binding SourcePath}" />
                 <DataGridTextColumn Header="Destination" Binding="{Binding DestinationPath}" />

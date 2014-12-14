@@ -20,14 +20,24 @@ namespace baseLibrary.DBInterface
         private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
         #region Static SQLs
-        private static String _loadLocalDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
-                                                        (select l1.filename, l1.date_taken, l1.album album, l2.album path2, l1.id from local_data l1, local_data l2 where
-                                                        l1.filename = l2.filename and
-                                                        l1.date_taken = l2.date_taken and
-                                                        l1.id = l2.id and 
-                                                        l1.album != l2.album
-                                                        order by l1.filename desc)
-                                                    group by album,path2;";
+        private static String _loadLocalDuplicatesSQL = 
+@"select  album src,path2 dest, count(1) numPics from 
+    (select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
+    l1.filename = l2.filename and
+    l1.date_taken = l2.date_taken and
+    l1.path != l2.path
+    order by l1.filename desc)
+group by album,path2;";
+        
+        private static String _loadLocalDuplicateImagesSQL = 
+@"select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
+    l1.filename = l2.filename and
+    l1.date_taken = l2.date_taken and
+    l1.path != l2.path and
+    l1.path = '{0}' and
+    l2.path = '{1}'
+    order by l1.filename desc;";
+
         private static String _loadRemoteDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
                                                         (select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.id from remote_data l1, remote_data l2 where
                                                         l1.TITLE = l2.TITLE and
@@ -44,14 +54,6 @@ namespace baseLibrary.DBInterface
                                                         l2.ALBUM = '{1}'
                                                         order by l1.TITLE desc;";
 
-        private static String _loadLocalDuplicateImagesSQL = @"select l1.filename, l1.date_taken, l1.album album, l2.album path2, l1.id from local_data l1, local_data l2 where
-                                                        l1.filename = l2.filename and
-                                                        l1.date_taken = l2.date_taken and
-                                                        l1.id = l2.id and 
-                                                        l1.album != l2.album and
-                                                        l1.album = '{0}' and
-                                                        l2.album = '{1}'
-                                                        order by l1.filename desc;";
 
         private static String _createTable = "CREATE TABLE if not exists ";
         private static String _CreateMasterConfigTable = _createTable + TableNames.MASTER_CONFIG + "(CONFIG_TYPE TEXT, PARAM TEXT, VALUE TEXT);";
@@ -582,7 +584,7 @@ namespace baseLibrary.DBInterface
 
         public static List<RemoteImageData> LoadFilesWithoutExtention(String albumName)
         {
-            String sql = String.Format(@"select * from REMOTE_DATA r where album='{0}' and title not like '%.%' and (substr(title, 0,4)='IMG' or substr(title, 0,4)='P10' or substr(title, 0,4)='DSC' or substr(title, 0,4)='Pic' or substr(title, 0,4)='100' or substr(title, 0,4)='Ima' or substr(title, 0,4)='SA4' or substr(title, 0,4)='Del'  or substr(title, 0,4)='_DS')
+            String sql = String.Format(@"select * from REMOTE_DATA r where album='{0}' and title not like '%.%' 
 order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
             return _LoadRemoteImageData(sql);
 
@@ -596,7 +598,7 @@ order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
 
         public static List<GenericAlbumData> AlbomsWithFilesWithoutExtention()
         {
-            String sql = @"select album PATH,count(1) COUNT from remOTE_DATA r where title not like '%.%' and (substr(title, 0,4)='IMG' or substr(title, 0,4)='P10' or substr(title, 0,4)='DSC' or substr(title, 0,4)='Pic' or substr(title, 0,4)='100' or substr(title, 0,4)='Ima' or substr(title, 0,4)='SA4' or substr(title, 0,4)='Del'  or substr(title, 0,4)='_DS')
+            String sql = @"select album PATH,count(1) COUNT from remOTE_DATA r where title not like '%.%' 
 group by album;";
             return _LoadLocalAlbums(sql);
         }

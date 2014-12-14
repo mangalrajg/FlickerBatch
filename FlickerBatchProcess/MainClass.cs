@@ -16,13 +16,13 @@ namespace FlickerBatch_AlbumRetriever
         static String join = "FALSE";
         static void Main(string[] args)
         {
-            //List<GenericAlbumData> lfad = DatabaseHelper.AlbomsWithFilesWithoutExtention();
-            //foreach (GenericAlbumData gad in lfad)
-            //{
-            //    UpdateBatch(gad);
-            //}
-            List<RemoteImageData> rlist = DatabaseHelper.LoadImagesToFixDate();
-            FixDates(rlist);
+            List<GenericAlbumData> lfad = DatabaseHelper.AlbomsWithFilesWithoutExtention();
+            foreach (GenericAlbumData gad in lfad)
+            {
+                UpdateBatch(gad);
+            }
+            //List<RemoteImageData> rlist = DatabaseHelper.LoadImagesToFixDate();
+            //FixDates(rlist);
         }
 
         private static void FixDates(List<RemoteImageData> rlist)
@@ -64,7 +64,7 @@ namespace FlickerBatch_AlbumRetriever
         //   if (config.TryGetValue("SaveLocalData", out saveLocalData) && saveLocalData == "TRUE")
         //   {
         //       Dictionary<string, string> local_data = DatabaseHelper.LoadMasterConfigData("LOCAL");
-        //       FilesystemHelper.SaveLocalImageData(ConfigModel.LocalData["LocalBasePath"]);
+        //       FilesystemHelper.SaveLocalImageData(ConfigModel._LocalData["LocalBasePath"]);
         //       //DatabaseHelper.RemovePrefix(local_data["LocalBasePath"]);
         //   }
 

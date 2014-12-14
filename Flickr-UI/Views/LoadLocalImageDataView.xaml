@@ -20,11 +20,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Content="Base Path" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding BasePath}"  VerticalAlignment="Center" IsReadOnly="True"/>
+        <UserControl Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Height="25" Content="Browse" Click="button1_Click"/>
+                <TextBox  Name="textBox1" Margin="0,0,5,0" Text="{Binding BasePath}"  VerticalAlignment="Center" IsReadOnly="True"/>
+            </DockPanel>
+        </UserControl>
         <Button Grid.Row="0" Grid.Column="3" Content="LoadFromFile" Command="local:StaticCommands.LoadBaseDirFromFileCommand" />
 
         <Button Grid.Row="1" Grid.Column="3" Content="ReLoadFromDB" Command="local:StaticCommands.LoadFromDBCommand" CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=DataContext}"/>
-        <DataGrid Grid.Row="2" Grid.ColumnSpan="4" ItemsSource="{Binding LocalAlbumList}" SelectionMode="Extended" 
+        <DataGrid Grid.Row="2" Grid.ColumnSpan="4" ItemsSource="{Binding LocalAlbumList}" SelectionMode="Extended"  
                   Name="MainGrid" SelectedItem="{Binding SelectedItem}" AutoGenerateColumns="False" MouseDown="MainGrid_MouseDown"  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn  Header="Name" Binding="{Binding Name}"/>

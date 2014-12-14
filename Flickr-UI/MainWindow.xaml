@@ -32,7 +32,8 @@
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>
-        <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" DataContext="{Binding StatusBarContext}">
+        <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" 
+                   DataContext="{Binding StatusBarContext}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -40,9 +41,8 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                     </Grid>
@@ -54,11 +54,10 @@
             <StatusBarItem Grid.Column="1">
                 <ProgressBar Value="{Binding ProgressValue}" Width="80" Height="18" />
             </StatusBarItem>
-            <StatusBarItem Grid.Column="3">
+            <StatusBarItem Grid.Column="2">
                 <TextBlock Text="{Binding CurrentJob}"/>
             </StatusBarItem>
         </StatusBar>
-
         <Grid Name="MainGrid" DockPanel.Dock="Left" Margin="10,10,10,10">
         </Grid>
     </DockPanel>

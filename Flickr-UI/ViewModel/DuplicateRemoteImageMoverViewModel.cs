@@ -80,7 +80,7 @@ namespace Flickr_UI
                     i++;
                 }
 
-                String tmpFolder = ConfigModel.RemoteData["RemoteTempAlbum"] + "\\" + SelectedItem.SourcePath;
+                String tmpFolder = ConfigModel.RemoteTempAlbum + "\\" + SelectedItem.SourcePath;
                 FlickerCache.MovePictures(backupList, SelectedItem.DestinationPath, tmpFolder);
                 FlickerCache.MovePictures(moveList, SelectedItem.SourcePath, SelectedItem.DestinationPath);
             }

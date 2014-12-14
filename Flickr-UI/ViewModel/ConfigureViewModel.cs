@@ -19,43 +19,26 @@ namespace Flickr_UI.ViewModel
         {
             get
             {
-                String key = "LocalBasePath";
-                if (ConfigModel.LocalData.ContainsKey(key))
-                {
-                    return ConfigModel.LocalData[key];
-                }
-                else
-                {
-                    return "";
-                }
+                return ConfigModel.LocalBasePath;
             }
             set
             {
-                String key = "LocalBasePath";
-                ConfigModel.LocalData[key] = value;
-                NotifyPropertyChanged(key);
+                ConfigModel.LocalBasePath = value;
+                NotifyPropertyChanged("LocalBasePath");
             }
         }
 
 
         public String APIKey
         {
-            get { 
-                String key = "APIKey";
-                if (ConfigModel.AuthData.ContainsKey(key))
-                {
-                    return ConfigModel.AuthData[key];
-                }
-                else
-                {
-                    return "";
-                }
+            get
+            {
+                return ConfigModel.APIKey;
             }
             set
             {
-                String key = "APIKey";
-                ConfigModel.AuthData[key] = value;
-                NotifyPropertyChanged(key);
+                ConfigModel.APIKey = value;
+                NotifyPropertyChanged("APIKey");
             }
         }
 
@@ -63,21 +46,12 @@ namespace Flickr_UI.ViewModel
         {
             get
             {
-                String key = "SharedSecret";
-                if (ConfigModel.AuthData.ContainsKey(key))
-                {
-                    return ConfigModel.AuthData[key];
-                }
-                else
-                {
-                    return "";
-                }
+                return ConfigModel.SharedSecret;
             }
             set
             {
-                String key = "SharedSecret";
-                ConfigModel.AuthData[key] = value;
-                NotifyPropertyChanged(key);
+                ConfigModel.SharedSecret = value;
+                NotifyPropertyChanged("SharedSecret");
             }
         }
 
@@ -85,21 +59,12 @@ namespace Flickr_UI.ViewModel
         {
             get
             {
-                String key = "AccessTokenStr";
-                if (ConfigModel.AuthData.ContainsKey(key))
-                {
-                    return ConfigModel.AuthData[key];
-                }
-                else
-                {
-                    return "";
-                }
+                return ConfigModel.AccessTokenStr;
             }
             set
             {
-                String key = "AccessTokenStr";
-                ConfigModel.AuthData[key] = value;
-                NotifyPropertyChanged(key);
+                ConfigModel.AccessTokenStr = value;
+                NotifyPropertyChanged("AccessTokenStr");
             }
         }
 
@@ -107,24 +72,15 @@ namespace Flickr_UI.ViewModel
         {
             get
             {
-                String key = "AuthToken";
-                if (ConfigModel.AuthData.ContainsKey(key))
-                {
-                    return ConfigModel.AuthData[key];
-                }
-                else
-                {
-                    return "";
-                }
+                return ConfigModel.AuthToken;
             }
             set
             {
-                String key = "AuthToken";
-                ConfigModel.AuthData[key] = value;
-                NotifyPropertyChanged(key);
+                ConfigModel.AuthToken = value;
+                NotifyPropertyChanged("AuthToken");
             }
         }
 
-        
+
     }
 }

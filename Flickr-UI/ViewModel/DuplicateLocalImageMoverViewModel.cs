@@ -56,7 +56,7 @@ namespace Flickr_UI
 
         private void MoveImages(object sender, ExecutedRoutedEventArgs e)
         {
-            foreach(DuplicateImageData di in SelectedItem.ImageDetails)
+            foreach (DuplicateImageData di in SelectedItem.ImageDetails)
             {
 
                 Console.WriteLine("Move " + di.SrcFileName + " to " + di.DestFileName);
@@ -64,9 +64,9 @@ namespace Flickr_UI
                 {
                     if (File.Exists(di.DestFileName))
                     {
-                        String tmpFolder = ConfigModel.LocalData["LocalTempPath"] + "\\" + di.SourcePath;
+                        String tmpFolder = ConfigModel.LocalTempPath + "\\" + di.SourcePath;
                         Directory.CreateDirectory(tmpFolder);
-                        File.Move(di.DestFileName, tmpFolder  +"\\"+ di.FileName);
+                        File.Move(di.DestFileName, tmpFolder + "\\" + di.FileName);
                     }
                     File.Move(di.SrcFileName, di.DestFileName);
                     di.IsProcessed = true;

@@ -78,7 +78,7 @@ namespace Flickr_UI
         {
             get
             {
-                return ConfigModel.LocalData["LocalBasePath"] + "\\" + SourcePath + "\\" + FileName;
+                return ConfigModel.LocalBasePath + "\\" + SourcePath + "\\" + FileName;
             }
         }
 
@@ -86,7 +86,7 @@ namespace Flickr_UI
         {
             get
             {
-                return ConfigModel.LocalData["LocalBasePath"] + "\\" + DestinationPath + "\\" + FileName;
+                return ConfigModel.LocalBasePath + "\\" + DestinationPath + "\\" + FileName;
             }
         }
 

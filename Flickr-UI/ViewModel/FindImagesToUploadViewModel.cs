@@ -51,6 +51,10 @@ namespace Flickr_UI.ViewModel
 
             CommandBinding binding = new CommandBinding(StaticCommands.UploadCommand, UploadImages, CanUploadImages);
             CommandManager.RegisterClassCommandBinding(typeof(FindImagesToUploadView), binding);
+
+            binding = new CommandBinding(StaticCommands.LoadAlbumsFromFlicker, ReloadImages, CanUploadImages);
+            CommandManager.RegisterClassCommandBinding(typeof(FindImagesToUploadView), binding);
+
         }
 
         private void LoadImagesToUpload()
@@ -68,6 +72,35 @@ namespace Flickr_UI.ViewModel
             e.CanExecute = true;
         }
 
+        private void ReloadImages(object sender, ExecutedRoutedEventArgs e)
+        {
+            FindImagesToUploadView view = (sender as FindImagesToUploadView);
+            var selectedItems = view.MainGrid.SelectedItems;
+            List<LocalAlbumUploadData> selectedItemList = new List<LocalAlbumUploadData>();
+
+            foreach (LocalAlbumUploadData lad in selectedItems)
+            {
+                selectedItemList.Add(lad);
+            }
+            Action<Object> del = ReloadImage;
+            Task t = Task.Factory.StartNew(del, selectedItemList);
+            t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
+
+        }
+
+        private void ReloadImage(object sender)
+        {
+            List<LocalAlbumUploadData> selectedItems = (sender as List<LocalAlbumUploadData>);
+            FlickerCache.CleanCache();
+            foreach (LocalAlbumUploadData lad in selectedItems)
+            {
+                String albumName = lad.Name;
+                FlickerCache.SaveRemoteAlbum(albumName);
+            }
+            Console.WriteLine("Reload Of all albums done");
+        }
+
+
         private void UploadImages(object sender, ExecutedRoutedEventArgs e)
         {
             FindImagesToUploadView view = (sender as FindImagesToUploadView);
@@ -81,7 +114,6 @@ namespace Flickr_UI.ViewModel
             Action<Object> del = UploadImage;
             Task t = Task.Factory.StartNew(del, selectedItemList);
             t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
-            //ThreadPool.QueueUserWorkItem(new WaitCallback(LoadFromFlicker), selectedItemList);
 
         }
 
