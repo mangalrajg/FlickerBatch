@@ -30,7 +30,6 @@ namespace Flickr_UI.ViewModel
             }
         }
 
-        private StatusBarViewModel _StatusBarContext;
         private ObservableCollection<DuplicateImageGroupData> _ImagesToSyncCollection;
         public ObservableCollection<DuplicateImageGroupData> ImagesToSyncCollection
         {
@@ -94,6 +93,7 @@ namespace Flickr_UI.ViewModel
         {
             int count = 0;
             List<DuplicateImageGroupData> selectedItems = (sender as List<DuplicateImageGroupData>);
+            _StatusBarContext.Initiallize(selectedItems.Count);
             foreach (DuplicateImageGroupData lad in selectedItems)
             {
                 List<String> imagesToSync = new List<String>();
@@ -103,8 +103,7 @@ namespace Flickr_UI.ViewModel
                 }
                 Console.WriteLine("Sync Album: " + lad.SourcePath + " To :" + lad.DestinationPath + " Count=" + imagesToSync.Count);
                 _StatusBarContext.CurrentJob = lad.SourcePath;
-                _StatusBarContext.ProgressValue = (count*100 / selectedItems.Count);
-                _StatusBarContext.StatusText = "Syncing " + count + "/" + selectedItems.Count;
+                _StatusBarContext.OneJobCompleted();
                 try
                 {
                     FlickerCache.MovePictures(imagesToSync, lad.SourcePath, lad.DestinationPath);
@@ -120,7 +119,7 @@ namespace Flickr_UI.ViewModel
                     FlickerCache.SaveRemoteAlbum(lad.SourcePath);
                     FlickerCache.SaveRemoteAlbum(lad.DestinationPath);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }
@@ -129,9 +128,5 @@ namespace Flickr_UI.ViewModel
 
         }
 
-        internal void SetStatusBarViewModel(StatusBarViewModel StatusBarContext)
-        {
-            _StatusBarContext = StatusBarContext;
-        }
     }
 }

@@ -19,10 +19,7 @@ namespace Flickr_UI.ViewModel
         private LocalAlbumUploadData _SelectedItem;
         public LocalAlbumUploadData SelectedItem
         {
-            get
-            {
-                return _SelectedItem;
-            }
+            get { return _SelectedItem; }
             set
             {
                 _SelectedItem = value;
@@ -30,14 +27,10 @@ namespace Flickr_UI.ViewModel
             }
         }
 
-        private StatusBarViewModel _StatusBarContext;
         private ObservableCollection<LocalAlbumUploadData> _ImagesToUploadCollection;
         public ObservableCollection<LocalAlbumUploadData> ImagesToUploadCollection
         {
-            get
-            {
-                return _ImagesToUploadCollection;
-            }
+            get { return _ImagesToUploadCollection; }
             set
             {
                 _ImagesToUploadCollection = value;
@@ -52,7 +45,7 @@ namespace Flickr_UI.ViewModel
             CommandBinding binding = new CommandBinding(StaticCommands.UploadCommand, UploadImages, CanUploadImages);
             CommandManager.RegisterClassCommandBinding(typeof(FindImagesToUploadView), binding);
 
-            binding = new CommandBinding(StaticCommands.LoadAlbumsFromFlicker, ReloadImages, CanUploadImages);
+            binding = new CommandBinding(StaticCommands.LoadAlbumFromFlicker, ReloadImages, CanUploadImages);
             CommandManager.RegisterClassCommandBinding(typeof(FindImagesToUploadView), binding);
 
         }
@@ -124,8 +117,8 @@ namespace Flickr_UI.ViewModel
 
         public void UploadImage(Object sender)
         {
-            int count = 0;
             List<LocalAlbumUploadData> selectedItems = (sender as List<LocalAlbumUploadData>);
+            _StatusBarContext.Initiallize(selectedItems.Count);
             foreach (LocalAlbumUploadData lad in selectedItems)
             {
                 String albumName = lad.Name;
@@ -136,20 +129,14 @@ namespace Flickr_UI.ViewModel
                 }
                 Console.WriteLine("Upload Album: " + albumName + " Count=" + imagesToUpload.Count);
                 _StatusBarContext.CurrentJob = albumName;
-                _StatusBarContext.ProgressValue = (count*100 / selectedItems.Count);
-                _StatusBarContext.StatusText = "Uploading " + count + "/" + selectedItems.Count;
                 FlickerCache.UploadImages(imagesToUpload, albumName);
                 Console.WriteLine("Save Images of Album :" + albumName);
                 FlickerCache.SaveRemoteAlbum(albumName);
-                count++;
+                _StatusBarContext.OneJobCompleted();
 
             }
 
         }
 
-        internal void SetStatusBarViewModel(StatusBarViewModel StatusBarContext)
-        {
-            _StatusBarContext = StatusBarContext;
-        }
     }
 }

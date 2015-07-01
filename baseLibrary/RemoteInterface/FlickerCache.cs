@@ -20,7 +20,7 @@ namespace baseLibrary.RemoteInterface
                 {
                     _AlbumList = FlickerHelper.LoadAllAlbums();
                     DatabaseHelper.DeleteAllFlickerAlbums();
-                    DatabaseHelper.SaveFlickerAlbums(_AlbumList);
+                    DatabaseHelper.SaveFlickrAlbums(_AlbumList);
                 }
                 return _AlbumList;
             }

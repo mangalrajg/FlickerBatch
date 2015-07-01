@@ -55,7 +55,7 @@ namespace baseLibrary.LocalInterface
         public static void SaveLocalImageData(String baseDir)
         {
             DatabaseHelper.DeleteLocalImageData(baseDir);
-            List<BaseImageData> lidList = getFileList(ConfigModel.LocalBasePath + "\\" + baseDir);
+            List<BaseImageData> lidList = getFileList(baseDir);
             DatabaseHelper.SaveImageData(lidList);
             DatabaseHelper.RemovePrefix(ConfigModel.LocalBasePath);
             lidList.Clear();

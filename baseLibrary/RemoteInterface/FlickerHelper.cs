@@ -71,6 +71,23 @@ namespace baseLibrary.RemoteInterface
             return retPs;
         }
 
+        public static Task<List<FlickrAlbumData>> LoadAllAlbumsAsync()
+        {
+            Console.WriteLine("Loading Albums from Flicker..... ");
+            Task<List<FlickrAlbumData>> t = Task.Factory.StartNew(() =>
+                {
+                    List<FlickrAlbumData> retPs = new List<FlickrAlbumData>();
+                    PhotosetCollection psc = flickr.PhotosetsGetList();
+                    foreach (Photoset ps in psc)
+                    {
+                        FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos + ps.NumberOfVideos, 0, ps.Description, DateTime.Now);
+                        retPs.Add(fad);
+                    }
+                    return retPs;
+                });
+            return t;
+        }
+
         public static void SaveRemotePicturesData(FlickrAlbumData ps)
         {
             int numPage = 0;
@@ -139,7 +156,6 @@ namespace baseLibrary.RemoteInterface
                     PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.DateTaken, numPage, 500);
                     foreach (Photo p in ppc)
                     {
-                        //Console.WriteLine("Test");
                         RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
                         allPics.Add(rid);
                     }

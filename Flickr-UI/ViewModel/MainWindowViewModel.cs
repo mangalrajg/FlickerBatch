@@ -13,7 +13,6 @@ namespace Flickr_UI.ViewModel
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private StatusBarViewModel _StatusBarContext;
         public StatusBarViewModel StatusBarContext
         {
             get { return _StatusBarContext; }
@@ -77,21 +76,10 @@ namespace Flickr_UI.ViewModel
             {
                 if (_FindImagesToUploadCommand == null)
                 {
-                    _FindImagesToUploadCommand = new GenericCommand(param => this.SetFindImagesToUploadViewModel(param), null);
+                    _FindImagesToUploadCommand = new GenericCommand(param => SetViewAndViewModel(param as Grid, new FindImagesToUploadView(), new FindImagesToUploadViewModel()), null);
                 }
                 return _FindImagesToUploadCommand;
             }
-        }
-
-        private object SetFindImagesToUploadViewModel(object param)
-        {
-            (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new FindImagesToUploadView());
-            FindImagesToUploadViewModel vm = new FindImagesToUploadViewModel();
-            vm.SetStatusBarViewModel(StatusBarContext);
-            (param as Grid).DataContext = vm;
-
-            return null;
         }
         #endregion
 
@@ -104,22 +92,12 @@ namespace Flickr_UI.ViewModel
             {
                 if (_SyncCommand == null)
                 {
-                    _SyncCommand = new GenericCommand(param => this.SetFindImagesToSyncViewModel(param), null);
+                    _SyncCommand = new GenericCommand(param => SetViewAndViewModel(param as Grid, new FindImagesToSyncView(), new FindImagesToSyncViewModel()), null);
                 }
                 return _SyncCommand;
             }
         }
 
-        private object SetFindImagesToSyncViewModel(object param)
-        {
-            (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new FindImagesToSyncView());
-            FindImagesToSyncViewModel vm = new FindImagesToSyncViewModel();
-            vm.SetStatusBarViewModel(StatusBarContext);
-            (param as Grid).DataContext = vm;
-
-            return null;
-        }
         #endregion
 
 
@@ -178,19 +156,12 @@ namespace Flickr_UI.ViewModel
             {
                 if (_LoadLocalImageDataCommand == null)
                 {
-                    _LoadLocalImageDataCommand = new GenericCommand(param => this.SetLoadLocalImageDataViewModel(param), null);
+                    _LoadLocalImageDataCommand = new GenericCommand(param => this.SetViewAndViewModel(param as Panel, new LoadLocalImageDataView(), new LoadLocalImageDataViewModel()), null);
                 }
                 return _LoadLocalImageDataCommand;
             }
         }
 
-        private object SetLoadLocalImageDataViewModel(object param)
-        {
-            (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new LoadLocalImageDataView());
-            (param as Grid).DataContext = new LoadLocalImageDataViewModel();
-            return null;
-        }
         #endregion
 
         #region LoadRemoteImageDataCommand
@@ -201,26 +172,28 @@ namespace Flickr_UI.ViewModel
             {
                 if (_LoadRemoteImageDataCommand == null)
                 {
-                    _LoadRemoteImageDataCommand = new GenericCommand(param => this.SetLoadRemoteImageDataViewModel(param), null);
+                    _LoadRemoteImageDataCommand = new GenericCommand(param => SetViewAndViewModel(param as Grid, new LoadRemoteImageDataView(), new LoadRemoteImageDataViewModel()), null);
                 }
                 return _LoadRemoteImageDataCommand;
             }
         }
 
-        private object SetLoadRemoteImageDataViewModel(object param)
-        {
-            (param as Grid).Children.Clear();
-            (param as Grid).Children.Add(new LoadRemoteImageDataView());
-            (param as Grid).DataContext = new LoadRemoteImageDataViewModel();
-            return null;
-        }
         #endregion
+
+        private void SetViewAndViewModel(Panel panel, ContentControl view, ViewModelBase viewModel)
+        {
+            panel.Children.Clear();
+            panel.Children.Add(view);
+            view.DataContext = viewModel;
+            viewModel.SetStatusBarViewModel(StatusBarContext);
+        }
+
 
         public MainWindowViewModel()
         {
             StatusBarContext = new StatusBarViewModel();
             StatusBarContext.PropertyChanged += StatusBarContext_PropertyChanged;
-            
+
         }
 
         void StatusBarContext_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

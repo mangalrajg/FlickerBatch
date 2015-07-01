@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Flickr_UI.ViewModel
 {
-    public class LoadLocalImageDataViewModel: ViewModelBase
+    public class LoadLocalImageDataViewModel : ViewModelBase
     {
         //private String _BasePath;
         public String BasePath
@@ -20,17 +20,14 @@ namespace Flickr_UI.ViewModel
             get { return ConfigModel.LocalBasePath; }
             set
             {
-                ConfigModel.LocalBasePath = value; 
+                ConfigModel.LocalBasePath = value;
                 NotifyPropertyChanged("BasePath");
             }
         }
         private LocalAlbumData _SelectedItem;
         public LocalAlbumData SelectedItem
         {
-            get
-            {
-                return _SelectedItem;
-            }
+            get { return _SelectedItem; }
             set
             {
                 _SelectedItem = value;
@@ -41,10 +38,7 @@ namespace Flickr_UI.ViewModel
         private ObservableCollection<LocalAlbumData> _LocalAlbumList;
         public ObservableCollection<LocalAlbumData> LocalAlbumList
         {
-            get
-            {
-                return _LocalAlbumList;
-            }
+            get { return _LocalAlbumList; }
             set
             {
                 _LocalAlbumList = value;
@@ -83,7 +77,7 @@ namespace Flickr_UI.ViewModel
         private void LoadBaseDirFromFile(object sender, ExecutedRoutedEventArgs e)
         {
             Action<Object> del = LoadFromFileSystem;
-            Task t = Task.Factory.StartNew(del, "");
+            Task t = Task.Factory.StartNew(del, BasePath);
             t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
         }
         private void LoadFromFile(object sender, ExecutedRoutedEventArgs e)

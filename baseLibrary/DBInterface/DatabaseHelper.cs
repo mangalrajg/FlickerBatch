@@ -20,23 +20,23 @@ namespace baseLibrary.DBInterface
         private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
         #region Static SQLs
-        private static String _loadLocalDuplicatesSQL = 
-@"select  album src,path2 dest, count(1) numPics from 
-    (select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
-    l1.filename = l2.filename and
-    l1.date_taken = l2.date_taken and
-    l1.path != l2.path
-    order by l1.filename desc)
-group by album,path2;";
-        
-        private static String _loadLocalDuplicateImagesSQL = 
-@"select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
-    l1.filename = l2.filename and
-    l1.date_taken = l2.date_taken and
-    l1.path != l2.path and
-    l1.path = '{0}' and
-    l2.path = '{1}'
-    order by l1.filename desc;";
+        private static String _loadLocalDuplicatesSQL =
+        @"select  album src,path2 dest, count(1) numPics from 
+            (select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
+            l1.filename = l2.filename and
+            l1.date_taken = l2.date_taken and
+            l1.path != l2.path
+            order by l1.filename desc)
+        group by album,path2;";
+
+        private static String _loadLocalDuplicateImagesSQL =
+        @"select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
+            l1.filename = l2.filename and
+            l1.date_taken = l2.date_taken and
+            l1.path != l2.path and
+            l1.path = '{0}' and
+            l2.path = '{1}'
+            order by l1.filename desc;";
 
         private static String _loadRemoteDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
                                                         (select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.id from remote_data l1, remote_data l2 where
@@ -57,11 +57,16 @@ group by album,path2;";
 
         private static String _createTable = "CREATE TABLE if not exists ";
         private static String _CreateMasterConfigTable = _createTable + TableNames.MASTER_CONFIG + "(CONFIG_TYPE TEXT, PARAM TEXT, VALUE TEXT);";
-        private static String _CreateFlickrAlbumsTable = _createTable + TableNames.FLICKR_ALBUMS + "(ID TEXT, NAME TEXT, DATE_CREATED TEXT,NUM_PICS INTEGER, DESCRIPTION TEXT, SYNC_DATE TEXT);";
+        private static String _CreateFlickrAlbumsTable = _createTable + TableNames.FLICKR_ALBUMS + "(ID TEXT, NAME TEXT, DATE_CREATED TEXT,NUM_PICS INTEGER, ACTUAL_NUM_PICS INTEGER, DESCRIPTION TEXT, SYNC_DATE TEXT);";
         private static String _CreateRemoteDataTable = _createTable + TableNames.REMOTE_DATA + "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT, PROCESSED TEXT, SYNC_DATE TEXT);";
         private static String _CreateLocalDataTable = _createTable + TableNames.LOCAL_DATA + "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT, SYNC_DATE TEXT);";
         private static String _CreateJoinDataTable = _createTable + TableNames.JOIN_DATA + "(NAME TEXT, DATE_TAKEN TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT, COUNT INTEGER);";
         #endregion
+
+        static DatabaseHelper()
+        {
+            InitiallizeDataStructure();
+        }
 
         public static void InitiallizeDataStructure()
         {
@@ -199,6 +204,15 @@ group by album,path2;";
             }
             return retList;
         }
+
+        public static void UpdateFlickerAlbum(FlickrAlbumData fad)
+        {
+            lock (DatabaseHelper.concurrencyObj)
+            {
+                ExecuteNonQuery(fad.DeleteSQL);
+                ExecuteNonQuery(fad.InsertSQL);
+            }
+        }
         public static List<FlickrAlbumData> LoadFlickerAlbums()
         {
             List<FlickrAlbumData> fadList = new List<FlickrAlbumData>();
@@ -218,9 +232,18 @@ group by album,path2;";
                         String name = (String)reader["NAME"];
                         String date_created = (String)reader["DATE_CREATED"];
                         int num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
+                        object o = reader["ACTUAL_NUM_PICS"];
+                        int actual_num_pics = 0;
+                        if (o is DBNull)
+                        {
+                        }
+                        else
+                        {
+                            actual_num_pics = Convert.ToInt32((Int64)reader["ACTUAL_NUM_PICS"]);
+                        }
                         String desc = (String)reader["DESCRIPTION"];
                         String sync_date = (String)reader["SYNC_DATE"];
-                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), num_pics, desc, GenericHelper.DateTimeSQLite(sync_date)));
+                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), num_pics, actual_num_pics, desc, GenericHelper.DateTimeSQLite(sync_date)));
                     }
 
                 }
@@ -229,7 +252,7 @@ group by album,path2;";
             return fadList;
 
         }
-        public static void SaveFlickerAlbums(List<FlickrAlbumData> fadList)
+        public static void SaveFlickrAlbums(List<FlickrAlbumData> fadList)
         {
             DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
             using (DbConnection cnn = fact.CreateConnection())
@@ -587,13 +610,11 @@ group by album,path2;";
             String sql = String.Format(@"select * from REMOTE_DATA r where album='{0}' and title not like '%.%' 
 order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
             return _LoadRemoteImageData(sql);
-
-
-
         }
 
         public static void DeleteRemoteImageData(List<RemoteImageData> rlist)
         {
+            throw new NotImplementedException();
         }
 
         public static List<GenericAlbumData> AlbomsWithFilesWithoutExtention()
@@ -609,6 +630,11 @@ group by album;";
             return _LoadRemoteImageData(sql);
         }
 
+        public static List<RemoteImageData> LoadRemoteImageData(String albumName)
+        {
+            String sql = String.Format(@"select * from REMOTE_DATA where ALBUM='{0}'", albumName); ;
+            return _LoadRemoteImageData(sql);
+        }
         public static void DeleteImageData(List<BaseImageData> rlist)
         {
             foreach (BaseImageData rid in rlist)
@@ -617,7 +643,7 @@ group by album;";
             }
         }
 
-        public static List<DuplicateImageData>  LoadImagesToSyncronise(String sourcePath, String destinationPath)
+        public static List<DuplicateImageData> LoadImagesToSyncronise(String sourcePath, String destinationPath)
         {
             //TODO
             String sql = @"
@@ -629,7 +655,7 @@ group by album;";
                         rd.album = '{0}' and
                         ld.path = '{1}' and
                         ld.date_taken != '20000101000000';";
-            return _LoadDuplicateImages(string.Format(sql,GenericHelper.StringSQLite(sourcePath), GenericHelper.StringSQLite(destinationPath)));
+            return _LoadDuplicateImages(string.Format(sql, GenericHelper.StringSQLite(sourcePath), GenericHelper.StringSQLite(destinationPath)));
         }
         public static List<DuplicateImageGroupData> LoadImageGroupsToSyncronise()
         {

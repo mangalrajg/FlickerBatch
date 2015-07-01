@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace baseLibrary.Model
 {
-    public class GenericAlbumData
+    public  class GenericAlbumData
     {
         public String Name { get; set; }
         public long NumberOfPhotos { get; set; }

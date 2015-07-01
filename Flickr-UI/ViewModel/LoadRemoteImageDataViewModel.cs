@@ -15,13 +15,11 @@ namespace Flickr_UI.ViewModel
 {
     class LoadRemoteImageDataViewModel : ViewModelBase
     {
-        private GenericAlbumData _SelectedItem;
-        public GenericAlbumData SelectedItem
+        private bool m_cancel = false;
+        private FlickrAlbumData _SelectedItem;
+        public FlickrAlbumData SelectedItem
         {
-            get
-            {
-                return _SelectedItem;
-            }
+            get { return _SelectedItem; }
             set
             {
                 _SelectedItem = value;
@@ -29,13 +27,10 @@ namespace Flickr_UI.ViewModel
             }
         }
 
-        private ObservableCollection<GenericAlbumData> _RemoteAlbumList;
-        public ObservableCollection<GenericAlbumData> RemoteAlbumList
+        private ObservableCollection<FlickrAlbumData> _RemoteAlbumList;
+        public ObservableCollection<FlickrAlbumData> RemoteAlbumList
         {
-            get
-            {
-                return _RemoteAlbumList;
-            }
+            get { return _RemoteAlbumList; }
             set
             {
                 _RemoteAlbumList = value;
@@ -45,97 +40,116 @@ namespace Flickr_UI.ViewModel
 
         public LoadRemoteImageDataViewModel()
         {
-            RemoteAlbumList = new ObservableCollection<GenericAlbumData>();
-            this.RefreshView();
+            RemoteAlbumList = new ObservableCollection<FlickrAlbumData>();
+            this.RefreshView(null);
 
-            CommandBinding binding = new CommandBinding(StaticCommands.LoadFromDBCommand, LoadFromDB, CanLoadFromDB);
+            CommandBinding binding = new CommandBinding(StaticCommands.LoadFromDBCommand, LoadFromDB, CanAlwaysDo);
             CommandManager.RegisterClassCommandBinding(typeof(LoadRemoteImageDataView), binding);
 
-            binding = new CommandBinding(StaticCommands.LoadAlbumsFromFlicker, LoadAlbumFromFlicker, CanLoadAlbumFromFlicker);
+            binding = new CommandBinding(StaticCommands.LoadAlbumFromFlicker, LoadAlbumFromFlicker, CanLoadAlbum);
             CommandManager.RegisterClassCommandBinding(typeof(LoadRemoteImageDataView), binding);
 
-            binding = new CommandBinding(StaticCommands.LoadAllAlbumsFromFlicker, LoadAllAlbumFromFlicker, CanLoadAllAlbumFromFlicker);
+            binding = new CommandBinding(StaticCommands.LoadAllAlbumsFromFlicker, LoadAllAlbumFromFlicker, CanAlwaysDo);
+            CommandManager.RegisterClassCommandBinding(typeof(LoadRemoteImageDataView), binding);
+
+            binding = new CommandBinding(StaticCommands.ClearDataGrid, ClearDataGrid, CanAlwaysDo);
+            CommandManager.RegisterClassCommandBinding(typeof(LoadRemoteImageDataView), binding);
+
+            binding = new CommandBinding(StaticCommands.CancelCommand, CancelAction, CanAlwaysDo);
             CommandManager.RegisterClassCommandBinding(typeof(LoadRemoteImageDataView), binding);
         }
 
-        private void CanLoadAllAlbumFromFlicker(object sender, CanExecuteRoutedEventArgs e)
+
+        #region oneLiners
+        private void CanLoadAlbum(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
-        }
-        private void CanLoadAlbumFromFlicker(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
-        private void CanLoadFromDB(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
+            e.CanExecute = SelectedItem != null;
         }
 
-        private void LoadAllAlbumFromFlicker(object sender, ExecutedRoutedEventArgs e)
-        {
-            DatabaseHelper.DeleteAllRemoteImageData();
-            List<FlickrAlbumData> fadList = FlickerHelper.LoadAllAlbums();
-            ThreadPool.SetMaxThreads(20, 20);
-            Action<Object> del = LoadFromFlicker;
-            foreach (FlickrAlbumData fad in fadList)
-            {
-                Task t = Task.Factory.StartNew(del, fad);
-                t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
-            }
-        }
-        private void LoadAlbumFromFlicker(object sender, ExecutedRoutedEventArgs e)
-        {
-            LoadRemoteImageDataView view = (sender as LoadRemoteImageDataView);
-            var selectedItems = view.MainGrid.SelectedItems;
-            Action<Object> del = LoadFromFlicker;
-            foreach (FlickrAlbumData fad in selectedItems)
-            {
-                Task t = Task.Factory.StartNew(del, fad);
-                t.ContinueWith(OnTaskComplete, TaskScheduler.FromCurrentSynchronizationContext());
-            }
 
-
+        private void CanAlwaysDo(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
         private void LoadFromDB(object sender, ExecutedRoutedEventArgs e)
         {
-            RefreshView();
+            RefreshView(null);
         }
 
-        private void OnTaskComplete(Task t)
+        private void OnTaskComplete(Task t, Object obj)
         {
-            this.RefreshView();
+            RefreshView(obj as FlickrAlbumData);
+            _StatusBarContext.OneJobCompleted();
+        }
+        private void CancelAction(object sender, ExecutedRoutedEventArgs e)
+        {
+            m_cancel = true;
+            _StatusBarContext.Reset();
         }
 
-        public void LoadFromFlicker(Object obj)
+        #endregion
+
+        private async void ClearDataGrid(object sender, ExecutedRoutedEventArgs e)
         {
-            FlickrAlbumData fad = (obj as FlickrAlbumData);
-            if (fad != null)
+            await Task.Factory.StartNew(() => DatabaseHelper.DeleteAllRemoteImageData());
+            RefreshView(null);
+        }
+
+        private async void LoadAllAlbumFromFlicker(object sender, ExecutedRoutedEventArgs e)
+        {
+            m_cancel = false; 
+            await Task.Factory.StartNew(() => DatabaseHelper.DeleteAllFlickerAlbums());
+            await Task.Factory.StartNew(() => DatabaseHelper.DeleteAllRemoteImageData());
+            List<FlickrAlbumData> fadList = await FlickerHelper.LoadAllAlbumsAsync();
+            await Task.Factory.StartNew(() => DatabaseHelper.SaveFlickrAlbums(fadList));
+            LoadFromFlicker(fadList);
+
+        }
+        private  void LoadAlbumFromFlicker(object sender, ExecutedRoutedEventArgs e)
+        {
+            m_cancel = false;
+            LoadRemoteImageDataView view = (sender as LoadRemoteImageDataView);
+            List<FlickrAlbumData> selectedItems = view.MainGrid.SelectedItems as List<FlickrAlbumData>;
+            LoadFromFlicker(selectedItems);
+        }
+
+        public void LoadFromFlicker(List<FlickrAlbumData> fadList)
+        {
+            _StatusBarContext.Initiallize(fadList.Count);
+            foreach (FlickrAlbumData fad in fadList)
             {
+                Task t = Task.Factory.StartNew(() => LoadFromFlicker(fad));
+                t.ContinueWith(OnTaskComplete, fad, TaskScheduler.FromCurrentSynchronizationContext());
+            }
+        }
+        public void LoadFromFlicker(FlickrAlbumData fad)
+        {
+            if (fad != null && m_cancel != true)
+            {
+                _StatusBarContext.CurrentJob = fad.Name;
                 DatabaseHelper.DeleteRemoteImageData(fad.Name);
                 List<BaseImageData> imageList = FlickerHelper.LoadRemotePicturesData(fad);
-                if(imageList.Count != fad.NumberOfPhotos)
-                {
-                    Console.WriteLine("===========================");
-                    Console.WriteLine("\tAlbum   =:" + fad.Name);
-                    Console.WriteLine("\tExpected=:" + fad.NumberOfPhotos);
-                    Console.WriteLine("\tActual  =:" + imageList.Count);
-
-                }
+                fad.ActualPhotoCount = imageList.Count;
+                DatabaseHelper.UpdateFlickerAlbum(fad);
                 DatabaseHelper.SaveImageData(imageList);
             }
         }
 
-
-        private void RefreshView()
+        private void RefreshView(FlickrAlbumData obj)
         {
-            List<GenericAlbumData> imgList = DatabaseHelper.LoadRemoteAlbums();
-            Console.WriteLine("We have " + imgList.Count + " Albums");
-            RemoteAlbumList.Clear();
-            foreach (GenericAlbumData gid in imgList)
+            if (m_cancel != true)
             {
-                RemoteAlbumList.Add(gid);
+                List<FlickrAlbumData> imgList = DatabaseHelper.LoadFlickerAlbums();
+                Console.WriteLine("We have " + imgList.Count + " Albums");
+                RemoteAlbumList.Clear();
+                foreach (FlickrAlbumData gid in imgList)
+                {
+                    RemoteAlbumList.Add(gid);
+                }
+
             }
         }
+
     }
 
 }
