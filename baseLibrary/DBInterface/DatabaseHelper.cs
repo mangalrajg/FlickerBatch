@@ -19,62 +19,19 @@ namespace baseLibrary.DBInterface
         //        private static String connectionString = @"Data Source=DBInterface\FlickerConfig.sqllite";
         private static String connectionString = @"Data Source=..\FlickerConfig.sqllite";
 
-        #region Static SQLs
-        private static String _loadLocalDuplicatesSQL =
-        @"select  album src,path2 dest, count(1) numPics from 
-            (select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
-            l1.filename = l2.filename and
-            l1.date_taken = l2.date_taken and
-            l1.path != l2.path
-            order by l1.filename desc)
-        group by album,path2;";
-
-        private static String _loadLocalDuplicateImagesSQL =
-        @"select l1.filename, l1.date_taken, l1.path album, l2.path path2 from local_data l1, local_data l2 where
-            l1.filename = l2.filename and
-            l1.date_taken = l2.date_taken and
-            l1.path != l2.path and
-            l1.path = '{0}' and
-            l2.path = '{1}'
-            order by l1.filename desc;";
-
-        private static String _loadRemoteDuplicatesSQL = @"select  album src,path2 dest, count(1) numPics from 
-                                                        (select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.id from remote_data l1, remote_data l2 where
-                                                        l1.TITLE = l2.TITLE and
-                                                        l1.date_taken = l2.date_taken and
-                                                        l1.ALBUM != l2.ALBUM
-                                                        order by l1.ALBUM desc)
-                                                    group by album,path2;";
-
-        private static String _loadRemoteDuplicateImagesSQL = @"select l1.TITLE, l1.date_taken, l1.ALBUM album, l2.ALBUM path2, l1.ID from remote_data l1, remote_data l2 where
-                                                        l1.TITLE = l2.TITLE and
-                                                        l1.date_taken = l2.date_taken and
-                                                        l1.ALBUM != l2.ALBUM and
-                                                        l1.ALBUM = '{0}' and
-                                                        l2.ALBUM = '{1}'
-                                                        order by l1.TITLE desc;";
-
-
-        private static String _createTable = "CREATE TABLE if not exists ";
-        private static String _CreateMasterConfigTable = _createTable + TableNames.MASTER_CONFIG + "(CONFIG_TYPE TEXT, PARAM TEXT, VALUE TEXT);";
-        private static String _CreateFlickrAlbumsTable = _createTable + TableNames.FLICKR_ALBUMS + "(ID TEXT, NAME TEXT, DATE_CREATED TEXT,NUM_PICS INTEGER, ACTUAL_NUM_PICS INTEGER, DESCRIPTION TEXT, SYNC_DATE TEXT);";
-        private static String _CreateRemoteDataTable = _createTable + TableNames.REMOTE_DATA + "(TITLE TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, ALBUM TEXT, ID TEXT, PROCESSED TEXT, SYNC_DATE TEXT);";
-        private static String _CreateLocalDataTable = _createTable + TableNames.LOCAL_DATA + "(FILENAME TEXT, DATE_TAKEN TEXT, DESCRIPTION TEXT, PATH TEXT, SIZE INTEGER, PROCESSED TEXT, SYNC_DATE TEXT);";
-        private static String _CreateJoinDataTable = _createTable + TableNames.JOIN_DATA + "(NAME TEXT, DATE_TAKEN TEXT, FLICKER_PATH TEXT, LOCAL_PATH TEXT, COUNT INTEGER);";
-        #endregion
 
         static DatabaseHelper()
         {
             InitiallizeDataStructure();
         }
 
-        public static void InitiallizeDataStructure()
+        private static void InitiallizeDataStructure()
         {
-            ExecuteNonQuery(_CreateMasterConfigTable);
-            ExecuteNonQuery(_CreateRemoteDataTable);
-            ExecuteNonQuery(_CreateLocalDataTable);
-            ExecuteNonQuery(_CreateFlickrAlbumsTable);
-            ExecuteNonQuery(_CreateJoinDataTable);
+            ExecuteNonQuery(SQLRepository._CreateMasterConfigTable);
+            ExecuteNonQuery(SQLRepository._CreateRemoteDataTable);
+            ExecuteNonQuery(SQLRepository._CreateLocalDataTable);
+            ExecuteNonQuery(SQLRepository._CreateFlickrAlbumsTable);
+            ExecuteNonQuery(SQLRepository._CreateJoinDataTable);
             return;
         }
 
@@ -154,20 +111,20 @@ namespace baseLibrary.DBInterface
 
         public static List<DuplicateImageGroupData> LoadRemoteDuplicateImageData()
         {
-            return _LoadDuplicateImageGroupData(_loadRemoteDuplicatesSQL, Mode.REMOTE);
+            return _LoadDuplicateImageGroupData(SQLRepository._loadRemoteDuplicatesSQL, Mode.REMOTE);
         }
         public static List<DuplicateImageGroupData> LoadLocalDuplicateImageData()
         {
-            return _LoadDuplicateImageGroupData(_loadLocalDuplicatesSQL, Mode.LOCAL);
+            return _LoadDuplicateImageGroupData(SQLRepository._loadLocalDuplicatesSQL, Mode.LOCAL);
         }
         public static List<DuplicateImageData> LoadLocalDuplicateImages(string SourcePath, string DestinationPath)
         {
-            String sql = String.Format(_loadLocalDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
+            String sql = String.Format(SQLRepository._loadLocalDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
             return _LoadDuplicateImages(sql);
         }
         public static List<DuplicateImageData> LoadRemoteDuplicateImages(string SourcePath, string DestinationPath)
         {
-            String sql = String.Format(_loadRemoteDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
+            String sql = String.Format(SQLRepository._loadRemoteDuplicateImagesSQL, GenericHelper.StringSQLite(SourcePath), GenericHelper.StringSQLite(DestinationPath));
             return _LoadDuplicateImages(sql);
         }
 
@@ -224,26 +181,42 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = "select * from " + TableNames.FLICKR_ALBUMS + ";";
+                    mycommand.CommandText = "select * from " + SQLRepository.FLICKR_ALBUMS + ";";
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
                         String albumid = (String)reader["ID"];
                         String name = (String)reader["NAME"];
                         String date_created = (String)reader["DATE_CREATED"];
-                        int num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
-                        object o = reader["ACTUAL_NUM_PICS"];
+                        int num_pics = 0;
+                        if (reader["NUM_PICS"] != DBNull.Value)
+                        {
+                            num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
+                        }
+                        int num_vid = 0;
+
+                        if (reader["NUM_VID"] != DBNull.Value)
+                        {
+                            num_vid = Convert.ToInt32((Int64)reader["NUM_VID"]);
+                        }
                         int actual_num_pics = 0;
-                        if (o is DBNull)
+                        int actual_num_vid = 0;
+
+                        object o = reader["ACTUAL_NUM_PICS"];
+                        if (o != DBNull.Value)
                         {
+                            actual_num_pics = Convert.ToInt32((Int64)o);
                         }
-                        else
+
+                        object o2 = reader["ACTUAL_NUM_VID"];
+                        if (o2 != DBNull.Value)
                         {
-                            actual_num_pics = Convert.ToInt32((Int64)reader["ACTUAL_NUM_PICS"]);
+                            actual_num_vid = Convert.ToInt32((Int64)o2);
                         }
+
                         String desc = (String)reader["DESCRIPTION"];
                         String sync_date = (String)reader["SYNC_DATE"];
-                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), num_pics, actual_num_pics, desc, GenericHelper.DateTimeSQLite(sync_date)));
+                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), desc, GenericHelper.DateTimeSQLite(sync_date), num_pics, actual_num_pics, num_vid, actual_num_vid));
                     }
 
                 }
@@ -330,7 +303,7 @@ namespace baseLibrary.DBInterface
         }
         public static List<LocalImageData> LoadLocalImageData(string baseDir)
         {
-            String sql = String.Format("SELECT * FROM " + TableNames.LOCAL_DATA + @" WHERE PATH='{0}';", GenericHelper.StringSQLite(baseDir));
+            String sql = String.Format("SELECT * FROM " + SQLRepository.LOCAL_DATA + @" WHERE PATH='{0}';", GenericHelper.StringSQLite(baseDir));
             return _LoadLocalImageData(sql);
         }
 
@@ -365,10 +338,10 @@ namespace baseLibrary.DBInterface
 
             DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
 
-            String getLocalDataSQL = "select * from " + TableNames.LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
-            String UpdateRemoteDataSQL = "UPDATE " + TableNames.REMOTE_DATA + " SET PROCESSED='Y' where TITLE = '{0}' and DATE_TAKEN='{1}';";
-            String UpdateLocalDataSQL = "UPDATE " + TableNames.LOCAL_DATA + "  SET PROCESSED='Y' where FILENAME = '{0}' and DATE_TAKEN='{1}';";
-            String InsertSQL = "Insert into " + TableNames.JOIN_DATA + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
+            String getLocalDataSQL = "select * from " + SQLRepository.LOCAL_DATA + " where FILENAME like '{0}%' and DATE_TAKEN='{1}';";
+            String UpdateRemoteDataSQL = "UPDATE " + SQLRepository.REMOTE_DATA + " SET PROCESSED='Y' where TITLE = '{0}' and DATE_TAKEN='{1}';";
+            String UpdateLocalDataSQL = "UPDATE " + SQLRepository.LOCAL_DATA + "  SET PROCESSED='Y' where FILENAME = '{0}' and DATE_TAKEN='{1}';";
+            String InsertSQL = "Insert into " + SQLRepository.JOIN_DATA + "(NAME,DATE_TAKEN,FLICKER_PATH ,LOCAL_PATH,COUNT ) VALUES('{0}','{1}','{2}','{3}','{4}');";
 
             using (DbConnection cnn = fact.CreateConnection())
             {
@@ -376,7 +349,7 @@ namespace baseLibrary.DBInterface
                 cnn.Open();
                 DbCommand cmd = cnn.CreateCommand();
                 var transaction = cnn.BeginTransaction();
-                cmd.CommandText = "select * from " + TableNames.REMOTE_DATA + " WHERE PROCESSED='N';";
+                cmd.CommandText = "select * from " + SQLRepository.REMOTE_DATA + " WHERE PROCESSED='N';";
                 int imageCount = 0;
                 DbDataReader remoteDataReader = cmd.ExecuteReader();
                 while (remoteDataReader.Read())
@@ -421,7 +394,7 @@ namespace baseLibrary.DBInterface
 
         public static void RemovePrefix(string albumName)
         {
-            ExecuteNonQuery(String.Format("update " + TableNames.LOCAL_DATA + " set PATH=substr(PATH,{0}) where PATH like '{1}%'", albumName.Length + 2, albumName));
+            ExecuteNonQuery(String.Format("update " + SQLRepository.LOCAL_DATA + " set PATH=substr(PATH,{0}) where PATH like '{1}%'", albumName.Length + 2, albumName));
             //ExecuteNonQuery(String.Format("update " + TableNames.REMOTE_DATA + " set ALBUM=substr(ALBUM,{0}) where ALBUM like '{1}%'", albumName.Length + 2, albumName));
         }
 
@@ -437,7 +410,7 @@ namespace baseLibrary.DBInterface
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
 
-                    mycommand.CommandText = String.Format("SELECT ID FROM " + TableNames.FLICKR_ALBUMS + " WHERE NAME='{0}';", GenericHelper.StringSQLite(albumName));
+                    mycommand.CommandText = String.Format("SELECT ID FROM " + SQLRepository.FLICKR_ALBUMS + " WHERE NAME='{0}';", GenericHelper.StringSQLite(albumName));
                     DbDataReader reader = mycommand.ExecuteReader();
                     reader.Read();
                     ret = reader.GetString(0);
@@ -461,7 +434,7 @@ namespace baseLibrary.DBInterface
 
         public static void DeleteAllRemoteImageData()
         {
-            Console.WriteLine("Delete Table: " + TableNames.REMOTE_DATA + " from database");
+            Console.WriteLine("Delete Table: " + SQLRepository.REMOTE_DATA + " from database");
             ExecuteNonQuery(String.Format("DELETE from REMOTE_DATA ;"));
         }
 
@@ -541,7 +514,8 @@ namespace baseLibrary.DBInterface
                     {
                         String path = (String)reader["PATH"];
                         long count = (long)reader["COUNT"];
-                        localImageList.Add(new GenericAlbumData(path, count));
+                        //TODO Video count
+                        localImageList.Add(new GenericAlbumData(path, count, 0));
                     }
 
                 }
@@ -617,10 +591,10 @@ order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
             throw new NotImplementedException();
         }
 
-        public static List<GenericAlbumData> AlbomsWithFilesWithoutExtention()
+        public static List<GenericAlbumData> AlbumsWithFilesWithoutExtention()
         {
-            String sql = @"select album PATH,count(1) COUNT from remOTE_DATA r where title not like '%.%' 
-group by album;";
+            String sql =
+@"select album PATH,count(1) COUNT from REMOTE_DATA r where title not like '%.%' group by album;";
             return _LoadLocalAlbums(sql);
         }
 

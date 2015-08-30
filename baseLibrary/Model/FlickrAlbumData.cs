@@ -11,7 +11,7 @@ namespace baseLibrary.Model
     public class FlickrAlbumData : GenericAlbumData
     {
         #region SQLs
-        private static String _InsertSQL = "Insert into " + TableNames.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,ACTUAL_NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}',{6})";
+        private static String _InsertSQL = "Insert into " + SQLRepository.FLICKR_ALBUMS + " (ID, NAME,DATE_CREATED,NUM_PICS,ACTUAL_NUM_PICS,DESCRIPTION, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}',{6})";
         public String InsertSQL
         {
             get
@@ -24,14 +24,14 @@ namespace baseLibrary.Model
         {
             get
             {
-                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + ";");
+                return String.Format("DELETE FROM " + SQLRepository.FLICKR_ALBUMS + ";");
             }
         }
         public String DeleteSQL
         {
             get
             {
-                return String.Format("DELETE FROM " + TableNames.FLICKR_ALBUMS + " WHERE ID='{0}';", AlbumId);
+                return String.Format("DELETE FROM " + SQLRepository.FLICKR_ALBUMS + " WHERE ID='{0}';", AlbumId);
             }
         }
 
@@ -55,26 +55,19 @@ namespace baseLibrary.Model
         public String Description { get; set; }
         public DateTime SyncDate { get; set; }
         public int ActualPhotoCount { get; set; }
+        public int ActualVideoCount { get; set; }
 
-        public FlickrAlbumData(String albumId, String name, DateTime dateTaken, int NumberOfPhotos, int actualPhotoCount, String desc, DateTime syncDate)
-            : base(name, NumberOfPhotos)
+        public FlickrAlbumData(String albumId, String name, DateTime dateTaken, String desc, DateTime syncDate,
+            int numberOfPhotos, int actualPhotoCount, int numberOfVideos, int actualVideoCount)
+            : base(name, numberOfPhotos,numberOfVideos)
         {
             this.AlbumId = albumId;
             this.DateCreated = dateTaken;
             this.Description = desc;
             this.SyncDate = syncDate;
             this.ActualPhotoCount = actualPhotoCount;
+            this.ActualVideoCount = actualVideoCount;
         }
-        public FlickrAlbumData(String albumId, String name, DateTime dateTaken, int NumberOfPhotos, String desc, DateTime syncDate)
-            : base(name, NumberOfPhotos)
-        {
-            this.AlbumId = albumId;
-            this.DateCreated = dateTaken;
-            this.Description = desc;
-            this.SyncDate = syncDate;
-            this.ActualPhotoCount = 0;
-        }
-
         public override string ToString()
         {
             return "[" + NumberOfPhotos + "][" + ActualPhotoCount + "] Name=" + Name;

@@ -9,13 +9,14 @@ namespace baseLibrary.Model
 {
     public static class ConfigModel
     {
-
-        private static String _LocalBasePathKey = "LocalBasePath";
         private static String _ApiKeyKey = "APIKey";
         private static String _SharedSecretKey = "SharedSecret";
         private static String _AccessTokenStrKey = "AccessTokenStr";
         private static String _AuthTokenKey = "AuthToken";
+
         private static String _LocalTempPathKey = "LocalTempPath";
+        private static String _LocalBasePathKey = "LocalBasePath";
+
         private static String _RemoteTempAlbumKey = "RemoteTempAlbum";
 
         private static Dictionary<string, string> _AuthData { get; set; }
@@ -24,171 +25,105 @@ namespace baseLibrary.Model
 
         static ConfigModel()
         {
+            Reload();
+        }
+
+        public static void Reload()
+        {
             _AuthData = DatabaseHelper.LoadMasterConfigData("AUTH");
             _LocalData = DatabaseHelper.LoadMasterConfigData("LOCAL");
             _RemoteData = DatabaseHelper.LoadMasterConfigData("REMOTE");
         }
+        public static void Save()
+        {
+            DatabaseHelper.SaveConfigData("AUTH", _AuthData);
+            DatabaseHelper.SaveConfigData("LOCAL", _LocalData);
+            DatabaseHelper.SaveConfigData("REMOTE", _RemoteData);
+        }
 
         public static String LocalBasePath
         {
+            set { _LocalData[_LocalBasePathKey] = value; }
             get
             {
-                if (ConfigModel._LocalData.ContainsKey(_LocalBasePathKey))
-                {
-                    return ConfigModel._LocalData[_LocalBasePathKey];
-                }
+                if (_LocalData.ContainsKey(_LocalBasePathKey))
+                    return _LocalData[_LocalBasePathKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._LocalData[_LocalBasePathKey] = value;
             }
         }
 
 
         public static String APIKey
         {
+            set { _AuthData[_ApiKeyKey] = value; }
             get
             {
-                if (ConfigModel._AuthData.ContainsKey(_ApiKeyKey))
-                {
-                    return ConfigModel._AuthData[_ApiKeyKey];
-                }
+                if (_AuthData.ContainsKey(_ApiKeyKey))
+                    return _AuthData[_ApiKeyKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._AuthData[_ApiKeyKey] = value;
             }
         }
 
         public static String SharedSecret
         {
+            set { _AuthData[_SharedSecretKey] = value; }
             get
             {
-                if (ConfigModel._AuthData.ContainsKey(_SharedSecretKey))
-                {
-                    return ConfigModel._AuthData[_SharedSecretKey];
-                }
+                if (_AuthData.ContainsKey(_SharedSecretKey))
+                    return _AuthData[_SharedSecretKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._AuthData[_SharedSecretKey] = value;
             }
         }
 
         public static String AccessTokenStr
         {
+            set { _AuthData[_AccessTokenStrKey] = value; }
             get
             {
-                if (ConfigModel._AuthData.ContainsKey(_AccessTokenStrKey))
-                {
-                    return ConfigModel._AuthData[_AccessTokenStrKey];
-                }
+                if (_AuthData.ContainsKey(_AccessTokenStrKey))
+                    return _AuthData[_AccessTokenStrKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._AuthData[_AccessTokenStrKey] = value;
             }
         }
 
         public static String AuthToken
         {
+            set { _AuthData[_AuthTokenKey] = value; }
             get
             {
-                if (ConfigModel._AuthData.ContainsKey(_AuthTokenKey))
-                {
-                    return ConfigModel._AuthData[_AuthTokenKey];
-                }
+                if (_AuthData.ContainsKey(_AuthTokenKey))
+                    return _AuthData[_AuthTokenKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._AuthData[_AuthTokenKey] = value;
             }
         }
 
-        //public static String AuthToken
-        //{
-        //    get
-        //    {
-        //        if (ConfigModel._AuthData.ContainsKey(_AuthTokenKey))
-        //        {
-        //            return ConfigModel._AuthData[_AuthTokenKey];
-        //        }
-        //        else
-        //        {
-        //            return "";
-        //        }
-        //    }
-        //    set
-        //    {
-        //        ConfigModel._AuthData[_AuthTokenKey] = value;
-        //    }
-        //}
-
         public static String LocalTempPath
         {
+            set { _LocalData[_LocalTempPathKey] = value; }
             get
             {
-                if (ConfigModel._LocalData.ContainsKey(_LocalTempPathKey))
-                {
-                    return ConfigModel._LocalData[_LocalTempPathKey];
-                }
+                if (_LocalData.ContainsKey(_LocalTempPathKey))
+                    return _LocalData[_LocalTempPathKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._LocalData[_LocalTempPathKey] = value;
             }
         }
 
         public static String RemoteTempAlbum
         {
+            set { _RemoteData[_RemoteTempAlbumKey] = value; }
             get
             {
-                if (ConfigModel._RemoteData.ContainsKey(_RemoteTempAlbumKey))
-                {
-                    return ConfigModel._RemoteData[_RemoteTempAlbumKey];
-                }
+                if (_RemoteData.ContainsKey(_RemoteTempAlbumKey))
+                    return _RemoteData[_RemoteTempAlbumKey];
                 else
-                {
                     return "";
-                }
-            }
-            set
-            {
-                ConfigModel._RemoteData[_RemoteTempAlbumKey] = value;
             }
         }
-
-        public static void Save()
-        {
-            DatabaseHelper.SaveConfigData("AUTH", _AuthData);
-            DatabaseHelper.SaveConfigData("LOCAL", _LocalData);
-            DatabaseHelper.SaveConfigData("REMOTE", _RemoteData);
-
-        }
-
     }
 }

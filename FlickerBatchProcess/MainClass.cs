@@ -16,7 +16,7 @@ namespace FlickerBatch_AlbumRetriever
         static String join = "FALSE";
         static void Main(string[] args)
         {
-            List<GenericAlbumData> lfad = DatabaseHelper.AlbomsWithFilesWithoutExtention();
+            List<GenericAlbumData> lfad = DatabaseHelper.AlbumsWithFilesWithoutExtention();
             foreach (GenericAlbumData gad in lfad)
             {
                 UpdateBatch(gad);

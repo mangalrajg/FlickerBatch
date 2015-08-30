@@ -24,7 +24,7 @@
                   Name="MainGrid" SelectedItem="{Binding SelectedItem}" AutoGenerateColumns="False" MouseDown="MainGrid_MouseDown"  IsReadOnly="True">
             <DataGrid.ContextMenu>
                 <ContextMenu >
-                    <MenuItem  Header="ReLoadFromFlicker" Command="local:StaticCommands.LoadAlbumsFromFlicker" />
+                    <MenuItem  Header="ReLoadFromFlicker" Command="local:StaticCommands.LoadAlbumFromFlicker" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Columns>

@@ -54,7 +54,7 @@
   <ItemGroup>
     <Compile Include="DBInterface\DatabaseHelper.cs" />
     <Compile Include="Generic\GenericHelper.cs" />
-    <Compile Include="Generic\TableNames.cs" />
+    <Compile Include="Generic\SQLRepository.cs" />
     <Compile Include="LocalInterface\FilesystemHelper.cs" />
     <Compile Include="LocalInterface\ImageInfo.cs" />
     <Compile Include="Model\GenericAlbumData.cs" />

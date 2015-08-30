@@ -43,6 +43,7 @@ namespace baseLibrary.RemoteInterface
                 writer.Serialize(sw, accessToken);
                 ConfigModel.AuthToken = AuthToken;
                 ConfigModel.AccessTokenStr = sw.ToString();
+                ConfigModel.Save();
             }
             flickr.OAuthAccessToken = accessToken.Token;
             flickr.OAuthAccessTokenSecret = accessToken.TokenSecret;
@@ -65,7 +66,7 @@ namespace baseLibrary.RemoteInterface
             PhotosetCollection psc = flickr.PhotosetsGetList();
             foreach (Photoset ps in psc)
             {
-                FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos + ps.NumberOfVideos, ps.Description, DateTime.Now);
+                FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.Description, DateTime.Now, ps.NumberOfPhotos, 0, ps.NumberOfVideos, 0);
                 retPs.Add(fad);
             }
             return retPs;
@@ -80,7 +81,7 @@ namespace baseLibrary.RemoteInterface
                     PhotosetCollection psc = flickr.PhotosetsGetList();
                     foreach (Photoset ps in psc)
                     {
-                        FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.NumberOfPhotos + ps.NumberOfVideos, 0, ps.Description, DateTime.Now);
+                        FlickrAlbumData fad = new FlickrAlbumData(ps.PhotosetId, ps.Title, ps.DateCreated, ps.Description, DateTime.Now, ps.NumberOfPhotos, 0, ps.NumberOfVideos, 0);
                         retPs.Add(fad);
                     }
                     return retPs;
@@ -265,7 +266,7 @@ namespace baseLibrary.RemoteInterface
             if (fullPhotoIDList.Length > 0)
             {
                 Photoset ps = flickr.PhotosetsCreate(newAlbumName, fullPhotoIDList[0]);
-                fad = new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                fad = new FlickrAlbumData(ps.PhotosetId, newAlbumName, ps.DateCreated, ps.Description, DateTime.Now, ps.NumberOfPhotos, ps.NumberOfPhotos, ps.NumberOfVideos, ps.NumberOfVideos);
                 MovePictures(fullPhotoIDList, oldAblumId, fad.AlbumId);
             }
             return fad;
@@ -317,7 +318,7 @@ namespace baseLibrary.RemoteInterface
                         if (fad == null && photoId != null)
                         {
                             Photoset ps = flickr.PhotosetsCreate(albumName, photoId);
-                            fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.NumberOfPhotos, ps.Description, DateTime.Now);
+                            fad = new FlickrAlbumData(ps.PhotosetId, albumName, ps.DateCreated, ps.Description, DateTime.Now, ps.NumberOfPhotos, ps.NumberOfPhotos, ps.NumberOfVideos, ps.NumberOfVideos);
                         }
                         else
                         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Flickr_UI.ViewModel
 {
@@ -11,6 +12,11 @@ namespace Flickr_UI.ViewModel
         public String StatusText
         {
             get { return _curJobCount + "/" + _JobCount; }
+            set { }
+        }
+        public String StatusBarVisiblity
+        {
+            get { return _curJobCount == 0 ? "Hidden" : "Visible"; }
             set { }
         }
         private String _CurrentJob;

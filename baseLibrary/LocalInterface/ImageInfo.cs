@@ -128,7 +128,7 @@ namespace FlickrSync
                             DateTaken = DateTime.Parse(bitmapMetadata.DateTaken);
 
                         Author = (string)bitmapMetadata.GetQuery(@"/xmp/dc:creator/{ushort=0}");
-                        if (string.IsNullOrEmpty(Author) && bitmapMetadata.Author.Count>0)
+                        if (!string.IsNullOrEmpty(Author) && bitmapMetadata.Author.Count>0)
                             Author = bitmapMetadata.Author[0];
 
                         City = (string)bitmapMetadata.GetQuery(@"/xmp/<xmpbag>photoshop:City");

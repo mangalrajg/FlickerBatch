@@ -12,7 +12,7 @@ namespace baseLibrary.Model
     {
 
         public LocalAlbumData(GenericAlbumData gid)
-            :base(gid.Name,gid.NumberOfPhotos)
+            :base(gid.Name,gid.NumberOfPhotos, gid.NumberOfVideos)
         {
         }
 

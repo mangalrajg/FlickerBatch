@@ -22,13 +22,13 @@ namespace baseLibrary.Model
 
         public override string DeleteSQL
         {
-            get { return String.Format("DELETE From {0} where FILENAME='{1}' and PATH='{2}'", TableNames.LOCAL_DATA, Name, Path); }
+            get { return String.Format("DELETE From {0} where FILENAME='{1}' and PATH='{2}'", SQLRepository.LOCAL_DATA, Name, Path); }
         }
 
-        public static String sInsertSQL = "Insert into " + TableNames.LOCAL_DATA
+        public static String sInsertSQL = "Insert into " + SQLRepository.LOCAL_DATA
             + "(FILENAME,DATE_TAKEN,DESCRIPTION,PATH,SIZE,PROCESSED, SYNC_DATE) VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')";
 
-        public static String sCheckSQL = "Select count(1) from " + TableNames.LOCAL_DATA
+        public static String sCheckSQL = "Select count(1) from " + SQLRepository.LOCAL_DATA
             + " where FILENAME='{0}' and PATH='{1}' and SIZE={2}";
         #endregion
 

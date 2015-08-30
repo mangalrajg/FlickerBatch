@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
+             xmlns:local="clr-namespace:Flickr_UI"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="600">
     <Grid>
@@ -13,7 +14,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition MaxHeight="40"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition MaxHeight="40"/>
             <RowDefinition MaxHeight="40"/>
             <RowDefinition MaxHeight="40"/>
@@ -23,17 +24,28 @@
             <RowDefinition MaxHeight="40"/>
             <RowDefinition MaxHeight="40"/>
         </Grid.RowDefinitions>
-        <Label Grid.ColumnSpan="4" Content="Autentification Data" Background="AliceBlue" VerticalAlignment="Center" />
-        <Label  Grid.Row="1" Grid.Column="0" Content="Api Key"  VerticalAlignment="Center"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding APIKey}" IsReadOnly="True" MaxHeight="25"/>
-        <Label  Grid.Row="1" Grid.Column="2" Content="Shared Secret"  VerticalAlignment="Center"/>
-        <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding SharedSecret}" IsReadOnly="True" MaxHeight="25"/>
-        <Label  Grid.Row="2" Grid.Column="0" Content="Access Token"  VerticalAlignment="Center"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="3" Text="{Binding AccessTokenStr}" IsReadOnly="True"/>
-
-        <Label Grid.ColumnSpan="4" Grid.Row="6" Content="Local Data" Background="AliceBlue" VerticalAlignment="Center" />
-        <Label  Grid.Row="7" Grid.Column="0" Content="Base Path"  VerticalAlignment="Center"/>
-        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding LocalBasePath}" MaxHeight="25"/>
+        <ToolBarPanel Grid.ColumnSpan="4">
+            <ToolBarTray>
+                <ToolBar Name="Toolbar">
+                    <Button Content="Save" Command="local:StaticCommands.SyncCommand" ToolTip="Save Config"/>
+                    <Button Content="Clear" Command="local:StaticCommands.ClearDataGrid" ToolTip="Reset Config"/>
+                </ToolBar>
+            </ToolBarTray>
+        </ToolBarPanel>
+        <Label Grid.Row="1" Grid.ColumnSpan="4" Content="Autentification Data" Background="AliceBlue" VerticalAlignment="Center" />
+        <Label  Grid.Row="2" Grid.Column="0" Content="Api Key"  VerticalAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding APIKey}" IsReadOnly="True" MaxHeight="25"/>
+        <Label  Grid.Row="2" Grid.Column="2" Content="Shared Secret"  VerticalAlignment="Center"/>
+        <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding SharedSecret}" IsReadOnly="True" MaxHeight="25"/>
+        <Label  Grid.Row="3" Grid.Column="0" Content="Access Token"  VerticalAlignment="Center" Margin="0,17,0,25" Grid.RowSpan="2"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Grid.RowSpan="3" Text="{Binding AccessTokenStr}" IsReadOnly="True"/>
+        <Label  Grid.Row="6" Grid.Column="0" Content="Auth Token"  VerticalAlignment="Center"/>
+        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding AuthToken}" />
+        <Button Content="Fetch AccessToken" Grid.Row="6" Grid.Column="2" IsEnabled="{Binding IsAccessTokenEmpty}"/>
+        <Button Content="Clear AccessToken" Grid.Row="6" Grid.Column="3" IsEnabled="{Binding IsAccessTokenNonEmpty}"/>
+        <Label Grid.ColumnSpan="4" Grid.Row="7" Content="Local Data" Background="AliceBlue" VerticalAlignment="Center" />
+        <Label  Grid.Row="8" Grid.Column="0" Content="Base Path"  VerticalAlignment="Center"/>
+        <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding LocalBasePath}" MaxHeight="25"/>
 
     </Grid>
 </UserControl>

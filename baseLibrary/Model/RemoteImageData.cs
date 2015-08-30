@@ -10,8 +10,8 @@ namespace baseLibrary.Model
     public class RemoteImageData : BaseImageData
     {
         #region SQLs
-        public static String sCheckSQL = "Select count(1) COUNT from " + TableNames.REMOTE_DATA + " where ID='{0}';";
-        public static String sInsertSQL = "Insert into " + TableNames.REMOTE_DATA + " (TITLE,DATE_TAKEN,DESCRIPTION,ALBUM,ID,PROCESSED,SYNC_DATE) "
+        public static String sCheckSQL = "Select count(1) COUNT from " + SQLRepository.REMOTE_DATA + " where ID='{0}';";
+        public static String sInsertSQL = "Insert into " + SQLRepository.REMOTE_DATA + " (TITLE,DATE_TAKEN,DESCRIPTION,ALBUM,ID,PROCESSED,SYNC_DATE) "
             + " VALUES('{0}','{1}','{2}','{3}', '{4}','{5}', '{6}')";
 
         public override string CheckSQL
@@ -28,7 +28,7 @@ namespace baseLibrary.Model
         }
         public override string DeleteSQL
         {
-            get { return String.Format("DELETE From {0} where ID='{1}' ", TableNames.REMOTE_DATA, PhotoId); }
+            get { return String.Format("DELETE From {0} where ID='{1}' ", SQLRepository.REMOTE_DATA, PhotoId); }
         }
         #endregion
 

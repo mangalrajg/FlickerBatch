@@ -33,7 +33,7 @@
             </RibbonTab>
         </Ribbon>
         <StatusBar x:Name="StatusBar" DockPanel.Dock="Bottom" Height="25" Background="AliceBlue" 
-                   DataContext="{Binding StatusBarContext}">
+                   DataContext="{Binding StatusBarContext}" Visibility="{Binding StatusBarVisiblity}">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -52,7 +52,7 @@
                 <TextBlock x:Name="statusBarText" Text="{Binding StatusText}"/>
             </StatusBarItem>
             <StatusBarItem Grid.Column="2">
-                <ProgressBar Value="{Binding ProgressValue}" Width="200" Height="18" Minimum="0" Maximum="100"/>
+                <ProgressBar Value="{Binding ProgressValue}" Width="200" Height="18" Minimum="0" Maximum="100"  Visibility="{Binding StatusBarVisiblity}"/>
             </StatusBarItem>
             <StatusBarItem Grid.Column="1">
                 <TextBlock Text="{Binding CurrentJob}"/>
