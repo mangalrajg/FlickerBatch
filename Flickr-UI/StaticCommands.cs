@@ -45,5 +45,8 @@ namespace Flickr_UI
         private static readonly RoutedUICommand _Cancel = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
         public static RoutedUICommand CancelCommand { get { return _Cancel; } }
 
+        private static readonly RoutedUICommand _MergeCommand = new RoutedUICommand("description", "DoSomethingCommand", typeof(StaticCommands));
+        public static RoutedUICommand MergeCommand { get { return _MergeCommand; } }
+
     }
 }

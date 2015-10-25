@@ -124,6 +124,29 @@ namespace Flickr_UI.ViewModel
         }
         #endregion
 
+        #region AlbumMaintenanceCommand
+        private ICommand _AlbumMaintenanceCommand;
+        public ICommand AlbumMaintenanceCommand
+        {
+            get
+            {
+                if (_AlbumMaintenanceCommand == null)
+                {
+                    _AlbumMaintenanceCommand = new GenericCommand(param => this.SetAlbumMaintenanceViewModel(param), null);
+                }
+                return _AlbumMaintenanceCommand;
+            }
+        }
+
+        private object SetAlbumMaintenanceViewModel(object param)
+        {
+            (param as Grid).Children.Clear();
+            (param as Grid).Children.Add(new AlbumMaintenanceView());
+            (param as Grid).DataContext = new AlbumMaintenanceViewModel();
+            return null;
+        }
+        #endregion
+
 
         #region ConfigureCommand
         private ICommand _ConfigureCommand;

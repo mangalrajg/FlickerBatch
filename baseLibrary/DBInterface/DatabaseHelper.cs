@@ -185,38 +185,8 @@ namespace baseLibrary.DBInterface
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
-                        String albumid = (String)reader["ID"];
-                        String name = (String)reader["NAME"];
-                        String date_created = (String)reader["DATE_CREATED"];
-                        int num_pics = 0;
-                        if (reader["NUM_PICS"] != DBNull.Value)
-                        {
-                            num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
-                        }
-                        int num_vid = 0;
-
-                        if (reader["NUM_VID"] != DBNull.Value)
-                        {
-                            num_vid = Convert.ToInt32((Int64)reader["NUM_VID"]);
-                        }
-                        int actual_num_pics = 0;
-                        int actual_num_vid = 0;
-
-                        object o = reader["ACTUAL_NUM_PICS"];
-                        if (o != DBNull.Value)
-                        {
-                            actual_num_pics = Convert.ToInt32((Int64)o);
-                        }
-
-                        object o2 = reader["ACTUAL_NUM_VID"];
-                        if (o2 != DBNull.Value)
-                        {
-                            actual_num_vid = Convert.ToInt32((Int64)o2);
-                        }
-
-                        String desc = (String)reader["DESCRIPTION"];
-                        String sync_date = (String)reader["SYNC_DATE"];
-                        fadList.Add(new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), desc, GenericHelper.DateTimeSQLite(sync_date), num_pics, actual_num_pics, num_vid, actual_num_vid));
+                        FlickrAlbumData fad = GetFlickrAlbumDataFromReader(reader);
+                        fadList.Add(fad);
                     }
 
                 }
@@ -224,6 +194,41 @@ namespace baseLibrary.DBInterface
             }
             return fadList;
 
+        }
+        private static FlickrAlbumData GetFlickrAlbumDataFromReader(DbDataReader reader)
+        {
+            String albumid = (String)reader["ID"];
+            String name = (String)reader["NAME"];
+            String date_created = (String)reader["DATE_CREATED"];
+            int num_pics = 0;
+            if (reader["NUM_PICS"] != DBNull.Value)
+            {
+                num_pics = Convert.ToInt32((Int64)reader["NUM_PICS"]);
+            }
+            int num_vid = 0;
+
+            if (reader["NUM_VID"] != DBNull.Value)
+            {
+                num_vid = Convert.ToInt32((Int64)reader["NUM_VID"]);
+            }
+            int actual_num_pics = 0;
+            int actual_num_vid = 0;
+
+            object o = reader["ACTUAL_NUM_PICS"];
+            if (o != DBNull.Value)
+            {
+                actual_num_pics = Convert.ToInt32((Int64)o);
+            }
+
+            object o2 = reader["ACTUAL_NUM_VID"];
+            if (o2 != DBNull.Value)
+            {
+                actual_num_vid = Convert.ToInt32((Int64)o2);
+            }
+
+            String desc = (String)reader["DESCRIPTION"];
+            String sync_date = (String)reader["SYNC_DATE"];
+            return new FlickrAlbumData(albumid, name, GenericHelper.DateTimeSQLite(date_created), desc, GenericHelper.DateTimeSQLite(sync_date), num_pics, actual_num_pics, num_vid, actual_num_vid);
         }
         public static void SaveFlickrAlbums(List<FlickrAlbumData> fadList)
         {
@@ -271,7 +276,7 @@ namespace baseLibrary.DBInterface
                 cnn.Close();
             }
         }
-        public static void DeleteAllFlickerAlbums()
+        public static void DeleteAllFlickrAlbums()
         {
             ExecuteNonQuery(FlickrAlbumData.DeleteAllSQL);
         }
@@ -448,24 +453,40 @@ namespace baseLibrary.DBInterface
                 cnn.Open();
                 using (DbCommand mycommand = cnn.CreateCommand())
                 {
-
                     mycommand.CommandText = sql;
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
-                        String fileName = (String)reader["TITLE"];
-                        String date_taken = (String)reader["DATE_TAKEN"];
-                        String description = (String)reader["DESCRIPTION"];
-                        String id = (String)reader["ID"];
-                        String sync_date = (String)reader["SYNC_DATE"];
-                        String album = (String)reader["ALBUM"];
-                        remoteImageList.Add(new RemoteImageData(album, id, fileName, GenericHelper.DateTimeSQLite(date_taken), description));
+                        RemoteImageData rid = GetRemoteImageDataFromReader(reader);
+                        remoteImageList.Add(rid);
                     }
 
                 }
                 cnn.Close();
             }
             return remoteImageList;
+        }
+
+        private static RemoteImageData GetRemoteImageDataFromReader(DbDataReader reader)
+        {
+            String fileName = (String)reader["TITLE"];
+            String date_taken = (String)reader["DATE_TAKEN"];
+            String description = (String)reader["DESCRIPTION"];
+            String id = (String)reader["ID"];
+            String sync_date = (String)reader["SYNC_DATE"];
+            String album = (String)reader["ALBUM"];
+            String media = (String)reader["MEDIA"];
+            return new RemoteImageData(album, id, fileName, GenericHelper.DateTimeSQLite(date_taken), description, media);
+        }
+        private static LocalImageData GetLocalImageDataFromReader(DbDataReader reader)
+        {
+            String fileName = (String)reader["FILENAME"];
+            String date_taken = (String)reader["DATE_TAKEN"];
+            String description = (String)reader["DESCRIPTION"];
+            long size = (Int64)reader["SIZE"];
+            String sync_date = (String)reader["SYNC_DATE"];
+            String path = (String)reader["PATH"];
+            return new LocalImageData(fileName, GenericHelper.DateTimeSQLite(date_taken), description, path, size);
         }
         private static List<LocalImageData> _LoadLocalImageData(String sql)
         {
@@ -482,13 +503,8 @@ namespace baseLibrary.DBInterface
                     DbDataReader reader = mycommand.ExecuteReader();
                     while (reader.Read())
                     {
-                        String fileName = (String)reader["FILENAME"];
-                        String date_taken = (String)reader["DATE_TAKEN"];
-                        String description = (String)reader["DESCRIPTION"];
-                        long size = (Int64)reader["SIZE"];
-                        String sync_date = (String)reader["SYNC_DATE"];
-                        String path = (String)reader["PATH"];
-                        localImageList.Add(new LocalImageData(fileName, GenericHelper.DateTimeSQLite(date_taken), description, path, size));
+                        LocalImageData lid = GetLocalImageDataFromReader(reader);
+                        localImageList.Add(lid);
                     }
 
                 }
@@ -578,7 +594,44 @@ namespace baseLibrary.DBInterface
             return duplicateImgList;
         }
 
+        public static List<DuplicateAlbumData> LoadDuplicateAlbums()
+        {
+            List<DuplicateAlbumData> remoteImageList = new List<DuplicateAlbumData>();
+            DbProviderFactory fact = DbProviderFactories.GetFactory(dbProvider);
+            using (DbConnection cnn = fact.CreateConnection())
+            {
+                cnn.ConnectionString = connectionString;
+                cnn.Open();
+                using (DbCommand mycommand = cnn.CreateCommand())
+                {
+                    mycommand.CommandText = SQLRepository._loadDuplicateAlbumsSQL;
+                    DbDataReader reader = mycommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String albumName = reader.GetString(0);
+                        DuplicateAlbumData rid = new DuplicateAlbumData(albumName);
+                        remoteImageList.Add(rid);
+                    }
 
+                }
+                foreach (DuplicateAlbumData rid in remoteImageList)
+                {
+                    using (DbCommand mycommand = cnn.CreateCommand())
+                    {
+                        mycommand.CommandText = mycommand.CommandText = String.Format("SELECT * FROM " + SQLRepository.FLICKR_ALBUMS + " WHERE NAME='{0}';", GenericHelper.StringSQLite(rid.AlbumName));
+                        DbDataReader reader = mycommand.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            FlickrAlbumData fad = GetFlickrAlbumDataFromReader(reader);
+                            rid.Albums.Add(fad);
+                        }
+                    }
+                }
+                cnn.Close();
+            }
+            return remoteImageList;
+        }
+  
         public static List<RemoteImageData> LoadFilesWithoutExtention(String albumName)
         {
             String sql = String.Format(@"select * from REMOTE_DATA r where album='{0}' and title not like '%.%' 
@@ -606,7 +659,7 @@ order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
 
         public static List<RemoteImageData> LoadRemoteImageData(String albumName)
         {
-            String sql = String.Format(@"select * from REMOTE_DATA where ALBUM='{0}'", albumName); ;
+            String sql = String.Format(@"select * from REMOTE_DATA where ALBUM='{0}'", GenericHelper.StringSQLite( albumName)); ;
             return _LoadRemoteImageData(sql);
         }
         public static void DeleteImageData(List<BaseImageData> rlist)
@@ -620,8 +673,8 @@ order by substr(title, 0,4);", GenericHelper.StringSQLite(albumName));
         public static List<DuplicateImageData> LoadImagesToSyncronise(String sourcePath, String destinationPath)
         {
             //TODO
-            String sql = @"
-                        select rd.title,rd.date_taken, rd.album, ld.path from local_DATA ld, remoTE_DATA rd
+            String sql = @"select rd.title,rd.date_taken, rd.album, ld.path 
+                        from local_DATA ld, remoTE_DATA rd
                         where
                         upper(ld.filename) = upper(rd.title) and
                         ld.date_taken = rd.date_taken and

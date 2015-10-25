@@ -58,52 +58,60 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Screens\Remote\Album\AlbumMaintenanceView.xaml.cs">
+      <DependentUpon>AlbumMaintenanceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Screens\Remote\Album\AlbumMaintenanceViewModel.cs" />
     <Compile Include="ViewModel\ConfigureViewModel.cs" />
-    <Compile Include="ViewModel\DuplicateRemoteImageMoverViewModel.cs" />
-    <Compile Include="ViewModel\FindImagesToSyncViewModel.cs" />
-    <Compile Include="ViewModel\FindImagesToUploadViewModel.cs" />
-    <Compile Include="ViewModel\LoadLocalImageDataViewModel.cs" />
-    <Compile Include="ViewModel\LoadRemoteImageDataViewModel.cs" />
+    <Compile Include="Screens\Remote\DuplicateRemover\DuplicateRemoteImageMoverViewModel.cs" />
+    <Compile Include="Screens\Remote\Sync\FindImagesToSyncViewModel.cs" />
+    <Compile Include="Screens\Remote\Upload\FindImagesToUploadViewModel.cs" />
+    <Compile Include="Screens\Local\LoadImageData\LoadLocalImageDataViewModel.cs" />
+    <Compile Include="Screens\Remote\LoadImageData\LoadRemoteImageDataViewModel.cs" />
     <Compile Include="ViewModel\StatusBarViewModel.cs" />
-    <Compile Include="Views\AlbumRenameView.xaml.cs">
+    <Compile Include="Screens\Remote\Album\AlbumRenameView.xaml.cs">
       <DependentUpon>AlbumRenameView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\AlbumRenameViewModel.cs" />
-    <Compile Include="ViewModel\DuplicateLocalImageMoverViewModel.cs" />
+    <Compile Include="Screens\Remote\Album\AlbumRenameViewModel.cs" />
+    <Compile Include="Screens\Local\DuplicateRemover\DuplicateLocalImageMoverViewModel.cs" />
     <Compile Include="Views\ConfigureView.xaml.cs">
       <DependentUpon>ConfigureView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DuplicateLocalImageMoverView.xaml.cs">
+    <Compile Include="Screens\Local\DuplicateRemover\DuplicateLocalImageMoverView.xaml.cs">
       <DependentUpon>DuplicateLocalImageMoverView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GenericCommand.cs" />
     <Compile Include="StaticCommands.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
-    <Compile Include="Views\DuplicateRemoteImageMoverView.xaml.cs">
+    <Compile Include="Screens\Remote\DuplicateRemover\DuplicateRemoteImageMoverView.xaml.cs">
       <DependentUpon>DuplicateRemoteImageMoverView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FindImagesToSyncView.xaml.cs">
+    <Compile Include="Screens\Remote\Sync\FindImagesToSyncView.xaml.cs">
       <DependentUpon>FindImagesToSyncView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FindImagesToUploadView.xaml.cs">
+    <Compile Include="Screens\Remote\Upload\FindImagesToUploadView.xaml.cs">
       <DependentUpon>FindImagesToUploadView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\LoadLocalImageDataView.xaml.cs">
+    <Compile Include="Screens\Local\LoadImageData\LoadLocalImageDataView.xaml.cs">
       <DependentUpon>LoadLocalImageDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\LoadRemoteImageDataView.xaml.cs">
+    <Compile Include="Screens\Remote\LoadImageData\LoadRemoteImageDataView.xaml.cs">
       <DependentUpon>LoadRemoteImageDataView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Views\AlbumRenameView.xaml">
+    <Page Include="Screens\Remote\Album\AlbumRenameView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Screens\Remote\Album\AlbumMaintenanceView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ConfigureView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DuplicateLocalImageMoverView.xaml">
+    <Page Include="Screens\Local\DuplicateRemover\DuplicateLocalImageMoverView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -119,23 +127,23 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\DuplicateRemoteImageMoverView.xaml">
+    <Page Include="Screens\Remote\DuplicateRemover\DuplicateRemoteImageMoverView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\FindImagesToSyncView.xaml">
+    <Page Include="Screens\Remote\Sync\FindImagesToSyncView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\FindImagesToUploadView.xaml">
+    <Page Include="Screens\Remote\Upload\FindImagesToUploadView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\LoadLocalImageDataView.xaml">
+    <Page Include="Screens\Local\LoadImageData\LoadLocalImageDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\LoadRemoteImageDataView.xaml">
+    <Page Include="Screens\Remote\LoadImageData\LoadRemoteImageDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -189,6 +197,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\upload.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Screens\MainMenu\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

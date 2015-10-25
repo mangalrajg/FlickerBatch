@@ -19,7 +19,7 @@ namespace baseLibrary.RemoteInterface
                 if (_AlbumList == null)
                 {
                     _AlbumList = FlickerHelper.LoadAllAlbums();
-                    DatabaseHelper.DeleteAllFlickerAlbums();
+                    DatabaseHelper.DeleteAllFlickrAlbums();
                     DatabaseHelper.SaveFlickrAlbums(_AlbumList);
                 }
                 return _AlbumList;
@@ -42,7 +42,7 @@ namespace baseLibrary.RemoteInterface
                         else
                         {
                             Console.WriteLine("===========================");
-                            Console.WriteLine("Duplicate Album: " + fad.Name);
+                            Console.WriteLine("Duplicate Album: " + fad.Name + " Please clean up the duplicate albums first ");
                             Console.WriteLine("===========================");
                         }
                     }

@@ -89,60 +89,60 @@ namespace baseLibrary.RemoteInterface
             return t;
         }
 
-        public static void SaveRemotePicturesData(FlickrAlbumData ps)
-        {
-            int numPage = 0;
-            while (ps.NumberOfPhotos > numPage * 500)
-            {
-                numPage++;
-                Console.WriteLine("Loading Album Info(Async): " + ps.Name);
-                var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
-                threadFinishEvents.Add(threadFinish);
-                #region flickr.PhotosetsGetPhotosAsync
-                flickr.PhotosetsGetPhotosAsync(ps.AlbumId, PhotoSearchExtras.All, numPage, 500, delegate(FlickrResult<PhotosetPhotoCollection> result)
-                {
-                    if (result.HasError == false)
-                    {
-                        List<BaseImageData> retList;
-                        List<BaseImageData> allPics = new List<BaseImageData>();
-                        foreach (Photo p in result.Result)
-                        {
-                            RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
-                            allPics.Add(rid);
-                        }
+        //public static void SaveRemotePicturesData(FlickrAlbumData ps)
+        //{
+        //    int numPage = 0;
+        //    while (ps.NumberOfPhotos > numPage * 500)
+        //    {
+        //        numPage++;
+        //        Console.WriteLine("Loading Album Info(Async): " + ps.Name);
+        //        var threadFinish = new EventWaitHandle(false, EventResetMode.ManualReset);
+        //        threadFinishEvents.Add(threadFinish);
+        //        #region flickr.PhotosetsGetPhotosAsync
+        //        flickr.PhotosetsGetPhotosAsync(ps.AlbumId, PhotoSearchExtras.All, numPage, 500, delegate(FlickrResult<PhotosetPhotoCollection> result)
+        //        {
+        //            if (result.HasError == false)
+        //            {
+        //                List<BaseImageData> retList;
+        //                List<BaseImageData> allPics = new List<BaseImageData>();
+        //                foreach (Photo p in result.Result)
+        //                {
+        //                    RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
+        //                    allPics.Add(rid);
+        //                }
 
-                        retList = DatabaseHelper.GetPhotosToSave(allPics);
-                        if (retList.Count > 0)
-                        {
-                            DatabaseHelper.SaveImageData(retList);
-                            Console.WriteLine("Saving Album Info(Async): " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Nothing to save in Album : " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
-                        }
-                        retList.Clear();
-                    }
-                    else
-                    {
-                        Console.WriteLine("==============================================================");
-                        Console.WriteLine("Error Retrieving Album Info(Async): " + ps.Name + " Count = " + ps.NumberOfPhotos);
-                        Console.WriteLine("==============================================================");
+        //                retList = DatabaseHelper.GetPhotosToSave(allPics);
+        //                if (retList.Count > 0)
+        //                {
+        //                    DatabaseHelper.SaveImageData(retList);
+        //                    Console.WriteLine("Saving Album Info(Async): " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
+        //                }
+        //                else
+        //                {
+        //                    Console.WriteLine("Nothing to save in Album : " + ps.Name + " Count = " + retList.Count + "/" + ps.NumberOfPhotos);
+        //                }
+        //                retList.Clear();
+        //            }
+        //            else
+        //            {
+        //                Console.WriteLine("==============================================================");
+        //                Console.WriteLine("Error Retrieving Album Info(Async): " + ps.Name + " Count = " + ps.NumberOfPhotos);
+        //                Console.WriteLine("==============================================================");
 
-                    }
-                    threadFinish.Set();
-                }
-                );
-                #endregion
-                if (threadFinishEvents.Count > 60)
-                {
-                    Mutex.WaitAll(threadFinishEvents.ToArray(), 150000);
-                    threadFinishEvents.Clear();
-                }
-            }
+        //            }
+        //            threadFinish.Set();
+        //        }
+        //        );
+        //        #endregion
+        //        if (threadFinishEvents.Count > 60)
+        //        {
+        //            Mutex.WaitAll(threadFinishEvents.ToArray(), 150000);
+        //            threadFinishEvents.Clear();
+        //        }
+        //    }
 
-            return;
-        }
+        //    return;
+        //}
 
         public static List<BaseImageData> LoadRemotePicturesData(FlickrAlbumData ps)
         {
@@ -150,14 +150,14 @@ namespace baseLibrary.RemoteInterface
             List<BaseImageData> allPics = new List<BaseImageData>();
             try
             {
-                while (ps.NumberOfPhotos > numPage * 500)
+                while (ps.NumberOfPhotos >= numPage * 500)
                 {
                     numPage++;
                     Console.WriteLine("Loading Album Info: " + ps.Name + "  Page:" + numPage + " NumberOfPhotos: " + ps.NumberOfPhotos);
-                    PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.DateTaken, numPage, 500);
+                    PhotosetPhotoCollection ppc = flickr.PhotosetsGetPhotos(ps.AlbumId, PhotoSearchExtras.DateTaken | PhotoSearchExtras.Media, numPage, 500);
                     foreach (Photo p in ppc)
                     {
-                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description);
+                        RemoteImageData rid = new RemoteImageData(ps.Name, p.PhotoId, p.Title, p.DateTaken, p.Description, p.Media);
                         allPics.Add(rid);
                     }
                 }
@@ -221,7 +221,7 @@ namespace baseLibrary.RemoteInterface
 
         //}
 
-        internal static void MovePictures(string[] fullPhotoIDList, string oldAblumId, string newAlbumId)
+        public static void MovePictures(string[] fullPhotoIDList, string oldAblumId, string newAlbumId)
         {
             int i = 0;
             while (fullPhotoIDList.Length > i * 300)
@@ -239,11 +239,10 @@ namespace baseLibrary.RemoteInterface
                     flickr.PhotosetsRemovePhotos(oldAblumId, photoIDList);
                     foreach (String photoID in photoIDList)
                     {
-                        flickr.PhotosetsAddPhotoAsync(newAlbumId, photoID, delegate
-                        {
-                            retPhotoId.Add(photoID);
-                            Console.WriteLine("photoID:" + photoID + "Album: " + newAlbumId);
-                        });
+                        flickr.PhotosetsAddPhoto(newAlbumId, photoID);
+                        retPhotoId.Add(photoID);
+                        Console.WriteLine("photoID:" + photoID + "Album: " + newAlbumId);
+
                     }
                 }
                 catch (Exception ex)
@@ -251,12 +250,7 @@ namespace baseLibrary.RemoteInterface
                     Console.WriteLine("Exception: " + ex.ToString());
                     throw ex;
                 }
-                Console.WriteLine("");
-                while (retPhotoId.Count <= photoIDList.Length - 10)
-                {
-                    Console.WriteLine("Status: " + retPhotoId.Count + "/" + photoIDList.Length);
-                    Thread.Sleep(1000);
-                }
+                Console.WriteLine("=============== DONE ================");
             }
         }
 
@@ -342,7 +336,7 @@ namespace baseLibrary.RemoteInterface
         public static String UploadImage(string fileName, string folder)
         {
             FileStream fs = new FileStream(folder + "\\" + fileName, FileMode.Open, FileAccess.Read);
-            flickr.HttpTimeout = 10000000;
+            flickr.HttpTimeout = 1000000;
             String photoId = flickr.UploadPicture(fs, fileName, fileName, "", "", false, false, false, ContentType.Photo, SafetyLevel.Safe, HiddenFromSearch.None);
             return photoId;
         }

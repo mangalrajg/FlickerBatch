@@ -20,7 +20,7 @@
             </RibbonTab>
 
             <RibbonTab Header="Flicker">
-                <RibbonGroup>
+                <RibbonGroup Header="Image">
                     <RibbonButton  Label="Test Connection" LargeImageSource="images/flickr.png"/>
                     <RibbonButton  Label="Build Remote Image Database" LargeImageSource="images/load.png" Command="{Binding LoadRemoteImageDataCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                     <RibbonButton  Label="Find Duplicates" LargeImageSource="images/duplicates.png" Command="{Binding DuplicateRemoteImageMoverCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
@@ -28,7 +28,10 @@
                     <RibbonButton  Label="Find Images to Upload" LargeImageSource="images/upload.png" Command="{Binding FindImagesToUploadCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                     <RibbonButton  Label="Syncronize Album Names with local path" LargeImageSource="images/upload.png" Command="{Binding SyncCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
 
-                    <RibbonButton  Label="Download" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+                </RibbonGroup>
+                <RibbonGroup Header="Album">
+                    <RibbonButton  Label="Album Mnt" LargeImageSource="images/load.png" Command="{Binding AlbumMaintenanceCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
+                    <RibbonButton  Label="Album Rename" LargeImageSource="images/upload.png" Command="{Binding AlbumRenameCommand}"  CommandParameter="{Binding ElementName=MainGrid}"/>
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>
